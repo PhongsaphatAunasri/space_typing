@@ -704,4 +704,4 @@ def run_lessons():
             current_index -= 1  # Move to the previous lesson
 
 # Start the lessons
-run_lessons()# 
+# run_lessons()# 
