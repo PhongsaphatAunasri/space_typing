@@ -4,8 +4,8 @@ pygame.init()
 pygame.mixer.init()
 info = pygame.display.Info()
 WIDTH, HEIGHT = info.current_w, info.current_h
-FPS = 120
-
+FPS = 60
+DEADZONE_LINE = HEIGHT - 20  # Adjust the value as needed
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)

@@ -5,6 +5,7 @@ import csv
 import math
 import config 
 import time
+import Particle
 # Initialize Pygame
 pygame.init()
 
@@ -114,26 +115,26 @@ key_greaterthan = pygame.image.load("assets/keys/key-greaterthan.png")
 key_question = pygame.image.load("assets/keys/key-question.png")
 
 # Particle Effect
-class WhiteParticle:
-    def __init__(self):
-        self.rect = pygame.Rect(
-            random.randint(0, config.WIDTH),
-            random.randint(0, config.HEIGHT),
-            random.randint(2, 4),
-            random.randint(2, 4)
-        )
-        self.speed = random.uniform(0.5, 2.0)
+# class WhiteParticle:
+#     def __init__(self):
+#         self.rect = pygame.Rect(
+#             random.randint(0, config.WIDTH),
+#             random.randint(0, config.HEIGHT),
+#             random.randint(2, 4),
+#             random.randint(2, 4)
+#         )
+#         self.speed = random.uniform(0.5, 2.0)
 
-    def update(self):
-        self.rect.y += self.speed
-        if self.rect.y > config.HEIGHT:
-            self.rect.y = 0
-            self.rect.x = random.randint(0, config.WIDTH)
+#     def update(self):
+#         self.rect.y += self.speed
+#         if self.rect.y > config.HEIGHT:
+#             self.rect.y = 0
+#             self.rect.x = random.randint(0, config.WIDTH)
 
-    def draw(self):
-        pygame.draw.rect(screen, config.WHITE, self.rect)
+#     def draw(self):
+#         pygame.draw.rect(screen, config.WHITE, self.rect)
 
-particles = [WhiteParticle() for _ in range(50)]
+# particles = [WhiteParticle() for _ in range(50)]
 
 # Helper function to load lesson content from a CSV file
 def load_lesson_from_csv(filename):
@@ -460,7 +461,7 @@ def show_error_summary(screen, error_count, correct_count, lesson_title):
 
     while running:
         screen.fill(config.BLACK)
-        for particle in particles:
+        for particle in Particle.particles:
             particle.update()
             particle.draw()
 
@@ -534,7 +535,7 @@ def lesson(screen, lesson_content, title, use_letter_spacing=True):
         screen.fill(config.BLACK)
 
         # Particle effects (if any)
-        for particle in particles:
+        for particle in Particle.particles:
             particle.update()
             particle.draw()
 

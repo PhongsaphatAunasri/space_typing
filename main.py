@@ -6,8 +6,9 @@ import math
 import config
 from lesson import run_lessons
 from lesson import lesson
-
-
+import Particle
+from survivor import survivor_mode
+from timetrial import time_trial_mode
 # Initialize Pygame
 pygame.init()
 pygame.mixer.init()
@@ -143,22 +144,6 @@ player_health = 3
 score = 0
 DELAYED_APPEND_EVENT = pygame.USEREVENT + 1
 DELAY_DURATION = 1000  # Delay duration in milliseconds (e.g., 1000 ms = 1 second)
-
-class WhiteParticle:
-    def __init__(self):
-        self.rect = pygame.Rect(random.randint(0, config.WIDTH), random.randint(0, config.HEIGHT), random.randint(2, 4), random.randint(2, 4))  # Random size
-        self.speed = random.uniform(0.5, 2.0)  # Particle speed
-
-    def update(self):
-        self.rect.y += self.speed
-        if self.rect.y > config.HEIGHT:
-            self.rect.y = 0
-            self.rect.x = random.randint(0, config.WIDTH)
-
-    def draw(self):
-        pygame.draw.rect(screen, config.WHITE, self.rect)
-        
-particles = [WhiteParticle() for _ in range(50)]
 
 class FallingWord:
     words_in_play = set()  # Static variable to keep track of current words in play
@@ -493,12 +478,12 @@ def pause_game():
 
     while True:
         screen.blit(background_image, (0, 0))
-        for particle in particles:
+        for particle in Particle.particles:
             particle.update()
 
         # Draw everything
         screen.fill(config.BLACK)  # Fill the screen with the background color
-        for particle in particles:
+        for particle in Particle.particles:
             particle.draw()
 
         # Draw pause text
@@ -535,6 +520,8 @@ def pause_game():
                     current_selection = (current_selection - 1) % len(pause_options)
                 elif event.key == pygame.K_DOWN:
                     current_selection = (current_selection + 1) % len(pause_options)
+
+
 def select_mode():
     # Track the current selection
     current_selection = 0
@@ -542,15 +529,15 @@ def select_mode():
 
     while True:
         screen.blit(background_image, (0, 0))
-        for particle in particles:
+        for particle in Particle.particles:
             particle.update()
 
         # Draw everything
         screen.fill(config.BLACK)  # Fill the screen with the background color
-        for particle in particles:
+        for particle in Particle.particles:
             particle.draw()
 
-        draw_text("Select Mode",config.FONT_Large, config.WHITE, config.WIDTH // 2, config.HEIGHT // 2 - 100, blink=False)
+        draw_text("Select Mode", config.FONT_Large, config.WHITE, config.WIDTH // 2, config.HEIGHT // 2 - 100, blink=False)
 
         # Draw mode options with config.grey border around the current selection
         for i, option in enumerate(mode_options):
@@ -577,13 +564,14 @@ def select_mode():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     select_sound.play()
-                    if current_selection == 0:  # Survivor option
+                    if current_selection == 0:  # Adventure mode
+                        # story_mode()  # Call the story_mode function
                         return "Adventure"
-                    elif current_selection == 1:  
+                    elif current_selection == 1:  # Survivor mode
                         return "Survivor"
-                    elif current_selection == 2:  # Back option
+                    elif current_selection == 2:  # Time Trial mode
                         return "Time Trial"
-                    elif current_selection == 3:  # Back option
+                    elif current_selection == 3:  # Back to Main Menu
                         return "Main Menu"
                 elif event.key == pygame.K_UP:
                     select_sound.play()
@@ -591,6 +579,7 @@ def select_mode():
                 elif event.key == pygame.K_DOWN:
                     select_sound.play()
                     current_selection = (current_selection + 1) % len(mode_options)
+
 def select_adventure_level():
     current_selection = 0
     levels = [f"Level {i+1}" for i in range(10)]  # List of 10 levels
@@ -603,12 +592,12 @@ def select_adventure_level():
 
     while True:
         screen.blit(background_image, (0, 0))
-        for particle in particles:
+        for particle in Particle.particles:
             particle.update()
 
         # Draw everything
         screen.fill(config.BLACK)  # Fill the screen with the background color
-        for particle in particles:
+        for particle in Particle.particles:
             particle.draw()
 
         draw_text("Select Adventure Level", config.FONT_Large, config.WHITE, config.WIDTH // 2, config.HEIGHT // 2 - 200, blink=False)
@@ -660,108 +649,6 @@ def select_adventure_level():
                     select_sound.play()
                     current_selection = (current_selection + 1) % len(levels)  # Move right in the grid
 
-
-def game_over_menu_s(player_score):
-    game_over_sound.play()
-    options = ["Restart", "Main Menu"]
-    current_selection = 0
-    button_height = 60  # config.Height of each button
-    spacing = 120  # Vertical spacing between buttons
-
-    while True:
-        screen.blit(background_image, (0, 0))
-        for particle in particles:
-            particle.update()
-
-        # Draw everything
-        screen.fill(config.BLACK)  # Fill the screen with the background color
-        for particle in particles:
-            particle.draw()
-
-        draw_text("Game Over", pygame.font.Font("assets/mania.ttf", 60), config.WHITE, config.WIDTH // 2, config.HEIGHT // 3)
-        draw_text(f"Total Score : {player_score}", pygame.font.Font("assets/mania.ttf", 42), config.YELLOW, config.WIDTH // 2, config.HEIGHT // 2.15)
-
-        for i, option in enumerate(options):
-            button_rect = pygame.Rect(config.WIDTH // 2 - 100, config.HEIGHT - 400 + i * spacing, 200, button_height)
-            if i == current_selection:
-                pygame.draw.rect(screen, config.WHITE, button_rect)
-                pygame.draw.rect(screen, config.YELLOW, button_rect, 5)
-                draw_text(option, font, config.BLACK, button_rect.centerx, button_rect.centery)
-            else:
-                pygame.draw.rect(screen, config.WHITE, button_rect, 5)
-                draw_text(option, font, config.WHITE, button_rect.centerx, button_rect.centery)
-
-        pygame.display.flip()
-
-        # Event handling
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    select_sound.play()
-                    if current_selection == 0:  # Restart option
-                        return gameplay(player_health)  # Restart the game with initial health
-                    elif current_selection == 1:  # Main Menu option
-                        return main_menu()
-                elif event.key == pygame.K_UP:
-                    select_sound.play()
-                    current_selection = (current_selection - 1) % len(options)
-                elif event.key == pygame.K_DOWN:
-                    select_sound.play()
-                    current_selection = (current_selection + 1) % len(options)
-def game_over_menu_t(score):
-    game_over_sound.play()
-    options = ["Restart", "Main Menu"]
-    current_selection = 0
-    button_height = 60  # config.Height of each button
-    spacing = 120  # Vertical spacing between buttons
-
-    while True:
-        screen.blit(background_image, (0, 0))
-        for particle in particles:
-            particle.update()
-
-        # Draw everything
-        screen.fill(config.BLACK)  # Fill the screen with the background color
-        for particle in particles:
-            particle.draw()
-
-        draw_text("Game Over", pygame.font.Font("assets/mania.ttf", 60), config.WHITE, config.WIDTH // 2, config.HEIGHT // 3)
-        draw_text(f"Total Score : {score}", pygame.font.Font("assets/mania.ttf", 42), config.YELLOW, config.WIDTH // 2, config.HEIGHT // 2.15)
-
-        for i, option in enumerate(options):
-            button_rect = pygame.Rect(config.WIDTH // 2 - 100, config.HEIGHT - 400 + i * spacing, 200, button_height)
-            if i == current_selection:
-                pygame.draw.rect(screen, config.WHITE, button_rect)
-                pygame.draw.rect(screen, config.YELLOW, button_rect, 5)
-                draw_text(option, font, config.BLACK, button_rect.centerx, button_rect.centery)
-            else:
-                pygame.draw.rect(screen, config.WHITE, button_rect, 5)
-                draw_text(option, font, config.WHITE, button_rect.centerx, button_rect.centery)
-
-        pygame.display.flip()
-
-        # Event handling
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    select_sound.play()
-                    if current_selection == 0:  # Restart option
-                        return time_trial_mode(score)  # Restart the game
-                    elif current_selection == 1:  # Main Menu option
-                        return main_menu()
-                elif event.key == pygame.K_UP:
-                    select_sound.play()
-                    current_selection = (current_selection - 1) % len(options)
-                elif event.key == pygame.K_DOWN:
-                    select_sound.play()
-                    current_selection = (current_selection + 1) % len(options)                  
-                    
 def game_over_menu_a(player_score):
     game_over_sound.play()
     options = ["Restart", "Main Menu"]
@@ -771,12 +658,12 @@ def game_over_menu_a(player_score):
 
     while True:
         screen.blit(background_image, (0, 0))
-        for particle in particles:
+        for particle in Particle.particles:
             particle.update()
 
         # Draw everything
         screen.fill(config.BLACK)  # Fill the screen with the background color
-        for particle in particles:
+        for particle in Particle.particles:
             particle.draw()
 
         draw_text("Game Over", pygame.font.Font("assets/mania.ttf", 60), config.WHITE, config.WIDTH // 2, config.HEIGHT // 3)
@@ -837,12 +724,12 @@ def main_menu():
 
     while True:
         screen.blit(background_image, (0, 0))
-        for particle in particles:
+        for particle in Particle.particles:
             particle.update()
 
         # Draw everything
         screen.fill(config.BLACK)  # Fill the screen with the background color
-        for particle in particles:
+        for particle in Particle.particles:
             particle.draw()
 
         draw_text("Space Typing", config.FONT_Large, config.WHITE, config.WIDTH // 2, config.HEIGHT // 2 - 100, blink=True)
@@ -916,12 +803,12 @@ def gameplay_a(player_health, mode, level_info, player_score, current_level):
 
     while running and player_health > 0:
         screen.blit(background_image, (0, 0))
-        for particle in particles:
+        for particle in Particle.particles:
             particle.update()
 
         # Draw everything
         screen.fill(config.BLACK)  # Fill the screen with the background color
-        for particle in particles:
+        for particle in Particle.particles:
             particle.draw()
 
         # Display the falling word for the player to type
@@ -1050,228 +937,6 @@ def gameplay_a(player_health, mode, level_info, player_score, current_level):
 
     # Game Over menu
     return game_over_menu_a(player_score)
-
-def gameplay(player_health):
-    player_score = 0
-    current_score = 0  # Total score accumulated throughout the game
-    score_multiplier = 1  # Initialize the score multiplier
-    max_multiplier = 10  # Set the maximum multiplier
-    clock = pygame.time.Clock()
-    falling_words = []
-    spaceship = Spaceship()
-    player_word = ""
-    base_speed = 0.5  # Starting speed
-    # Variables for displaying multiplier streak
-    multiplier_streak = 0
-    multiplier_display_timer = 0
-    running = True
-
-    while running and player_health > 0:
-        speed_increase = (player_score // 100000) * 1  # Increase speed by 0.5 for every 100,000 score
-        falling_word_speed = base_speed + speed_increase
-        
-        screen.blit(background_image, (0, 0))
-        for particle in particles:
-            particle.update()
-
-        # Draw everything
-        screen.fill(config.BLACK)  # Fill the screen with the background color
-        for particle in particles:
-            particle.draw()
-
-        # Display the falling word for the player to type
-        if len(falling_words) < 4 and random.randint(0, 100) < 2:
-            falling_words.append(FallingWord(falling_words, falling_word_speed))
-
-        # Display the input word
-        draw_text(player_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT - 150)
-
-        # Event handling
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    result = pause_game()
-                    if result == "Main Menu":
-                        running = False
-
-                elif event.key == pygame.K_BACKSPACE:
-                    player_word = player_word[:-1]  # Remove the last character from the input word
-                else:
-                    player_word += event.unicode
-                    
-                    correct_word = None
-                    for word in falling_words:
-                        if player_word == word.word:
-                            correct_word = word
-                            break
-                    if correct_word:
-                        correct_sound.play()
-                        word_length = len(correct_word.word)
-                        
-                        # multiplier
-                        player_score += word_length * 1000 * score_multiplier
-                        score_multiplier = min(score_multiplier + 1, max_multiplier)
-                        spaceship.shoot_missile(correct_word, missile_image)
-                        player_word = ""
-                    
-        # Update and draw missiles
-        spaceship.update_missiles(falling_words)
-        spaceship.draw_missiles()
-
-        # Update and draw falling words
-        for word in falling_words:
-            if word.update(player_health):  # Pass player_health as an argument
-                falling_words.remove(word)
-            else:
-                word.draw(player_word)
-
-        # Check deadzone 
-        for word in falling_words:
-            if word.rect.y > DEADZONE_LINE:
-                    player_health -= 1
-                    loss_hp_sound.play()
-                    score_multiplier = 1  # Reset multiplier when health decreases
-                    falling_words.remove(word)
-
-        # Display player score and health
-        draw_text(f"Score", font, config.WHITE,60, 20)  # Top left
-        draw_text(f"{player_score}", font, config.WHITE, 60, 55)  # Top left
-        #draw_text(f"CountingScore : {current_score}", font, config.WHITE, 80, 60)  # Display total score
-        draw_health(player_health, 3, 70) # Top right
-
-
-
-        # Display multiplier streak
-        if multiplier_display_timer > 0:
-            draw_text(f"Multiplier: {score_multiplier}x", font, config.WHITE, config.WIDTH - 150, 20)
-            multiplier_display_timer -= 1
-
-        # Display the spaceship
-        spaceship.update()
-        spaceship.draw()
-
-        # Remove words that have fallen off the screen
-        falling_words = [word for word in falling_words if word.rect.y < config.HEIGHT]
-
-        # Update multiplier display timer
-        if score_multiplier > 1:
-            multiplier_display_timer = 120  # Reset the display timer if multiplier is active
-
-        if player_health <= 0:
-            game_over_sound.play()
-        pygame.display.flip()
-        clock.tick(config.FPS)
-
-    # Game Over menu
-    return game_over_menu_s(player_score)
-def time_trial_mode(score):
-    player = Spaceship()
-    falling_words = []
-    player_word = ""
-    score = 0
-    game_time = 60
-    start_ticks = None  # Timer starts as None
-    paused_time_total = 0  # Track the total paused time
-    word_positions = [(config.WIDTH // 2, 0)]
-    generate_new_word = False  # Flag to indicate new word generation
-
-    for position in word_positions:
-        falling_words.append(FallingWordTimeTrial(position))
-    running = True  # Initialize running
-    paused = False  # Initialize paused state
-    while running:
-        screen.fill(config.BLACK)
-        screen.blit(background_image, (0, 0))
-        for particle in particles:
-            particle.update()
-
-        # Draw everything
-        screen.fill(config.BLACK)  # Fill the screen with the background color
-        for particle in particles:
-            particle.draw()
-
-        # Only start the timer when all the initial words are frozen
-        if all(word.frozen for word in falling_words) and start_ticks is None:
-            start_ticks = pygame.time.get_ticks()
-
-        if start_ticks is not None:
-            seconds = (pygame.time.get_ticks() - start_ticks - paused_time_total) / 1000
-
-        draw_text(player_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT - 150)
-
-        for word in falling_words:
-            word.draw(player_word)
-            if word.rect.y >= player.rect.top and word.rect.y <= player.rect.bottom and \
-                    word.rect.x >= player.rect.left and word.rect.x <= player.rect.right:
-                if player_word == word.word:
-                    player_word = ""
-                    break
-                else:
-                    falling_words.remove(word)
-                    player_word = ""
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    paused_duration = pause_game()
-                    if paused_duration == "Main Menu":
-                        running = False
-                    else:
-                        paused_time_total += paused_duration
-                elif event.key == pygame.K_SPACE:
-                    correct_word = None
-                    for word in falling_words:
-                        if player_word == word.word:
-                            correct_word = word
-                            break
-
-                    if correct_word:
-                        correct_sound.play()
-                        missile_image = pygame.image.load("assets/missile.png")
-                        player.shoot_missile(correct_word, missile_image)
-                        player_word = ""
-                        score += 1
-                        generate_new_word = True  # Set the flag to generate new word
-                    else:
-                        incorrect_sound.play()
-                        player_word = ""
-                elif event.key == pygame.K_BACKSPACE:
-                    player_word = player_word[:-1]
-                else:
-                    player_word += event.unicode
-
-        # Check the flag and generate new word
-        if generate_new_word:
-            falling_words.append(FallingWordTimeTrial((config.WIDTH // 2, 0)))
-            generate_new_word = False
-
-        player.update_missiles(falling_words)
-        player.draw_missiles()
-
-        for word in falling_words[:]:
-            word.update()
-
-        draw_text(f"Score: {score}", font, config.WHITE, 60, 25)
-        if start_ticks is not None:
-            line_length = int((config.WIDTH * (game_time - seconds)) / game_time)
-            pygame.draw.rect(screen, config.GREY, (line_length - config.WIDTH, 0, config.WIDTH, 10))
-
-        player.update()
-        player.draw()
-
-        if start_ticks is not None and seconds > game_time:
-            game_over_sound.play()
-            running = False
-
-        pygame.display.flip()
-        pygame.time.Clock().tick(config.FPS)
-
-    # Game Over menu
-    return game_over_menu_t(score)
 def adventure_mode():
     current_level = 1
     player_health = 3  # Reset health for adventure mode
@@ -1328,7 +993,7 @@ menu_option = main_menu()
 
 while menu_option != "Exit":
     if menu_option == "Survivor":
-        menu_option = gameplay(player_health)
+        menu_option = survivor_mode(player_health)
     elif menu_option == "Adventure":
         menu_option = adventure_mode()
     elif menu_option == "Time Trial":
