@@ -114,29 +114,11 @@ key_lessthan = pygame.image.load("assets/keys/key-lessthan.png")
 key_greaterthan = pygame.image.load("assets/keys/key-greaterthan.png")
 key_question = pygame.image.load("assets/keys/key-question.png")
 
-# Particle Effect
-# class WhiteParticle:
-#     def __init__(self):
-#         self.rect = pygame.Rect(
-#             random.randint(0, config.WIDTH),
-#             random.randint(0, config.HEIGHT),
-#             random.randint(2, 4),
-#             random.randint(2, 4)
-#         )
-#         self.speed = random.uniform(0.5, 2.0)
+press_space = pygame.image.load("assets/keys/key-space-p.png")
+blank = pygame.image.load("assets/keys/blank-layout.png")
+space_key_position = (config.WIDTH/5 , config.HEIGHT - 350) 
 
-#     def update(self):
-#         self.rect.y += self.speed
-#         if self.rect.y > config.HEIGHT:
-#             self.rect.y = 0
-#             self.rect.x = random.randint(0, config.WIDTH)
 
-#     def draw(self):
-#         pygame.draw.rect(screen, config.WHITE, self.rect)
-
-# particles = [WhiteParticle() for _ in range(50)]
-
-# Helper function to load lesson content from a CSV file
 def load_lesson_from_csv(filename):
     with open(filename, "r") as file:
         reader = csv.reader(file)
@@ -148,294 +130,306 @@ def draw_text(text, font, color, x, y, center=True):
     rect = surface.get_rect(center=(x, y) if center else (x, y))
     screen.blit(surface, rect)
 
+# Constants
+BLINK_INTERVAL = 500  # Milliseconds (adjust to change blink speed)
 
+# Variable to track time
+last_blink_time = 1
+show_highlight = False  # Toggle state
 # Draw keyboard layout and highlight current key
 def draw_keyboard_layout(current_char):
     # Draw the base keyboard layout
-    screen.blit(keyboard_image, (config.WIDTH/5 , config.HEIGHT - 350))  # Display at the bottom of the screen
-    # Highlight the specific key if applicable
-    if current_char == " ":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_space, space_key_position)
-    elif current_char == "a":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350) 
-        screen.blit(key_a, space_key_position)
-    elif current_char == "b":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_b, space_key_position)
-    elif current_char == "c":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_c, space_key_position)
-    elif current_char == "d":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_d, space_key_position)
-    elif current_char == "e":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_e, space_key_position)
-    elif current_char == "f":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_f, space_key_position)
-    elif current_char == "g":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_g, space_key_position)
-    elif current_char == "h":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_h, space_key_position)
-    elif current_char == "i":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_i, space_key_position)
-    elif current_char == "j":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_j, space_key_position)
-    elif current_char == "k":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_k, space_key_position)
-    elif current_char == "l":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_l, space_key_position)
-    elif current_char == "m":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_m, space_key_position)
-    elif current_char == "n":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_n, space_key_position)
-    elif current_char == "o":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_o, space_key_position)
-    elif current_char == "p":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_p, space_key_position)
-    elif current_char == "q":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_q, space_key_position)
-    elif current_char == "r":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_r, space_key_position)
-    elif current_char == "s":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_s, space_key_position)
-    elif current_char == "t":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_t, space_key_position)
-    elif current_char == "u":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_u, space_key_position)
-    elif current_char == "v":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_v, space_key_position)
-    elif current_char == "w":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_w, space_key_position)
-    elif current_char == "x":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_x, space_key_position)
-    elif current_char == "y":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_y, space_key_position)
-    elif current_char == "z":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_z, space_key_position)
-    elif current_char == "A":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350) 
-        screen.blit(key_A, space_key_position)
-    elif current_char == "B":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_B, space_key_position)
-    elif current_char == "C":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_C, space_key_position)
-    elif current_char == "D":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_D, space_key_position)
-    elif current_char == "E":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_E, space_key_position)
-    elif current_char == "F":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_F, space_key_position)
-    elif current_char == "G":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_G, space_key_position)
-    elif current_char == "H":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_H, space_key_position)
-    elif current_char == "I":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_I, space_key_position)
-    elif current_char == "J":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_J, space_key_position)
-    elif current_char == "K":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_K, space_key_position)
-    elif current_char == "L":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_L, space_key_position)
-    elif current_char == "M":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_M, space_key_position)
-    elif current_char == "N":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_N, space_key_position)
-    elif current_char == "O":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_O, space_key_position)
-    elif current_char == "P":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_P, space_key_position)
-    elif current_char == "Q":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_Q, space_key_position)
-    elif current_char == "R":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_R, space_key_position)
-    elif current_char == "S":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_S, space_key_position)
-    elif current_char == "T":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_T, space_key_position)
-    elif current_char == "U":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_U, space_key_position)
-    elif current_char == "V":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_V, space_key_position)
-    elif current_char == "W":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_W, space_key_position)
-    elif current_char == "X":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_X, space_key_position)
-    elif current_char == "Y":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_Y, space_key_position)
-    elif current_char == "Z":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_Z, space_key_position)
-    elif current_char == "1":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_1, space_key_position)
-    elif current_char == "2":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_2, space_key_position)
-    elif current_char == "3":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_3, space_key_position)
-    elif current_char == "4":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_4, space_key_position)
-    elif current_char == "5":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_5, space_key_position)
-    elif current_char == "6":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_6, space_key_position)
-    elif current_char == "7":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_7, space_key_position)
-    elif current_char == "8":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_8, space_key_position)
-    elif current_char == "9":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_9, space_key_position)
-    elif current_char == "0":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_0, space_key_position)
-    elif current_char == "!":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_exclamation, space_key_position)
-    elif current_char == "@":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_at, space_key_position)
-    elif current_char == "#":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_hash, space_key_position)
-    elif current_char == "$":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_dollarsign, space_key_position)
-    elif current_char == "%":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_percent, space_key_position)
-    elif current_char == "^":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_circumflex, space_key_position)
-    elif current_char == "&":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_and, space_key_position)
-    elif current_char == "*":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_star, space_key_position)
-    elif current_char == "(":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_open_parentheses, space_key_position)
-    elif current_char == ")":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_close_parentheses, space_key_position)
-    elif current_char == "-":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_hyphen, space_key_position)
-    elif current_char == "=":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_equal, space_key_position)
-    elif current_char == "_":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_underscore, space_key_position)
-    elif current_char == "+":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_addition, space_key_position)
-    elif current_char == "[":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_open_square, space_key_position)
-    elif current_char == "{":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_open_curly, space_key_position)
-    elif current_char == "]":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_close_square, space_key_position)
-    elif current_char == "}":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_close_curly, space_key_position)
-    elif current_char == ";":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_semicolon, space_key_position)
-    elif current_char == ":":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_colon, space_key_position)
-    elif current_char == "'":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_apostrophe, space_key_position)
-    elif current_char == '"':
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_quotation, space_key_position)
-    elif current_char == chr(92):
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_backslash, space_key_position)
-    elif current_char == "|":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_bar, space_key_position)
-    elif current_char == ",":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_comma, space_key_position)
-    elif current_char == ".":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_fullstop, space_key_position)
-    elif current_char == "/":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_slash, space_key_position)
-    elif current_char == "<":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_lessthan, space_key_position)
-    elif current_char == ">":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_greaterthan, space_key_position)
-    elif current_char == "?":
-        space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-        screen.blit(key_question, space_key_position)  
-    elif current_char.isalpha():
-        # Logic for other keys (optional: add highlighting for other characters)
-        pass
+    global last_blink_time, show_highlight
+    screen.blit(blank, (config.WIDTH/5 , config.HEIGHT - 350))  # Display at the bottom of the screen
+    current_time = pygame.time.get_ticks()
+    if current_time - last_blink_time > BLINK_INTERVAL:
+        show_highlight = not show_highlight  # Toggle visibility
+        last_blink_time = current_time  # Reset timer
+
+    # Highlight the key only if blinking state is "on"
+    if show_highlight:
+        if current_char == " ":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_space, space_key_position)  
+        elif current_char == "a":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350) 
+            screen.blit(key_a, space_key_position)
+        elif current_char == "b":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_b, space_key_position)
+        elif current_char == "c":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_c, space_key_position)
+        elif current_char == "d":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_d, space_key_position)
+        elif current_char == "e":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_e, space_key_position)
+        elif current_char == "f":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_f, space_key_position)
+        elif current_char == "g":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_g, space_key_position)
+        elif current_char == "h":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_h, space_key_position)
+        elif current_char == "i":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_i, space_key_position)
+        elif current_char == "j":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_j, space_key_position)
+        elif current_char == "k":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_k, space_key_position)
+        elif current_char == "l":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_l, space_key_position)
+        elif current_char == "m":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_m, space_key_position)
+        elif current_char == "n":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_n, space_key_position)
+        elif current_char == "o":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_o, space_key_position)
+        elif current_char == "p":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_p, space_key_position)
+        elif current_char == "q":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_q, space_key_position)
+        elif current_char == "r":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_r, space_key_position)
+        elif current_char == "s":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_s, space_key_position)
+        elif current_char == "t":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_t, space_key_position)
+        elif current_char == "u":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_u, space_key_position)
+        elif current_char == "v":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_v, space_key_position)
+        elif current_char == "w":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_w, space_key_position)
+        elif current_char == "x":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_x, space_key_position)
+        elif current_char == "y":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_y, space_key_position)
+        elif current_char == "z":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_z, space_key_position)
+        elif current_char == "A":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350) 
+            screen.blit(key_A, space_key_position)
+        elif current_char == "B":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_B, space_key_position)
+        elif current_char == "C":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_C, space_key_position)
+        elif current_char == "D":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_D, space_key_position)
+        elif current_char == "E":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_E, space_key_position)
+        elif current_char == "F":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_F, space_key_position)
+        elif current_char == "G":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_G, space_key_position)
+        elif current_char == "H":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_H, space_key_position)
+        elif current_char == "I":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_I, space_key_position)
+        elif current_char == "J":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_J, space_key_position)
+        elif current_char == "K":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_K, space_key_position)
+        elif current_char == "L":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_L, space_key_position)
+        elif current_char == "M":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_M, space_key_position)
+        elif current_char == "N":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_N, space_key_position)
+        elif current_char == "O":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_O, space_key_position)
+        elif current_char == "P":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_P, space_key_position)
+        elif current_char == "Q":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_Q, space_key_position)
+        elif current_char == "R":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_R, space_key_position)
+        elif current_char == "S":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_S, space_key_position)
+        elif current_char == "T":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_T, space_key_position)
+        elif current_char == "U":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_U, space_key_position)
+        elif current_char == "V":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_V, space_key_position)
+        elif current_char == "W":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_W, space_key_position)
+        elif current_char == "X":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_X, space_key_position)
+        elif current_char == "Y":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_Y, space_key_position)
+        elif current_char == "Z":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_Z, space_key_position)
+        elif current_char == "1":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_1, space_key_position)
+        elif current_char == "2":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_2, space_key_position)
+        elif current_char == "3":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_3, space_key_position)
+        elif current_char == "4":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_4, space_key_position)
+        elif current_char == "5":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_5, space_key_position)
+        elif current_char == "6":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_6, space_key_position)
+        elif current_char == "7":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_7, space_key_position)
+        elif current_char == "8":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_8, space_key_position)
+        elif current_char == "9":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_9, space_key_position)
+        elif current_char == "0":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_0, space_key_position)
+        elif current_char == "!":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_exclamation, space_key_position)
+        elif current_char == "@":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_at, space_key_position)
+        elif current_char == "#":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_hash, space_key_position)
+        elif current_char == "$":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_dollarsign, space_key_position)
+        elif current_char == "%":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_percent, space_key_position)
+        elif current_char == "^":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_circumflex, space_key_position)
+        elif current_char == "&":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_and, space_key_position)
+        elif current_char == "*":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_star, space_key_position)
+        elif current_char == "(":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_open_parentheses, space_key_position)
+        elif current_char == ")":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_close_parentheses, space_key_position)
+        elif current_char == "-":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_hyphen, space_key_position)
+        elif current_char == "=":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_equal, space_key_position)
+        elif current_char == "_":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_underscore, space_key_position)
+        elif current_char == "+":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_addition, space_key_position)
+        elif current_char == "[":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_open_square, space_key_position)
+        elif current_char == "{":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_open_curly, space_key_position)
+        elif current_char == "]":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_close_square, space_key_position)
+        elif current_char == "}":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_close_curly, space_key_position)
+        elif current_char == ";":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_semicolon, space_key_position)
+        elif current_char == ":":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_colon, space_key_position)
+        elif current_char == "'":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_apostrophe, space_key_position)
+        elif current_char == '"':
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_quotation, space_key_position)
+        elif current_char == chr(92):
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_backslash, space_key_position)
+        elif current_char == "|":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_bar, space_key_position)
+        elif current_char == ",":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_comma, space_key_position)
+        elif current_char == ".":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_fullstop, space_key_position)
+        elif current_char == "/":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_slash, space_key_position)
+        elif current_char == "<":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_lessthan, space_key_position)
+        elif current_char == ">":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_greaterthan, space_key_position)
+        elif current_char == "?":
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
+            screen.blit(key_question, space_key_position)  
+        elif current_char.isalpha():
+            # Logic for other keys (optional: add highlighting for other characters)
+            pass
 
 # Updated lesson function to include accuracy tracking
 def is_valid_keypress(event):
@@ -477,7 +471,7 @@ def show_error_summary(screen, error_count, correct_count, lesson_title):
 
         # Display "Accuracy" after 3 seconds
         if time.time() - start_time >= accuracy_display_time:
-            draw_text(f"{accuracy:.2f}%", config.FONT, config.YELLOW, (config.WIDTH // 2) + 100, config.HEIGHT // 1.7)
+            draw_text(f"{accuracy:.2f}%", config.FONT, config.YELLOW, (config.WIDTH // 2) + 110, config.HEIGHT // 1.7)
 
         # Display prompt to continue
         draw_text("Press Enter to continue", config.FONT, config.WHITE, config.WIDTH // 2 , config.HEIGHT // 1.4)
@@ -501,7 +495,7 @@ def lesson(screen, lesson_content, title, use_letter_spacing=True):
     typed_index = 0
     current_item_index = 0
     current_item = lesson_content[current_item_index]
-    feedback = "Type the character shown above!"
+    feedback = "---"
     error_count = 0
     correct_count = 0
     mistake_indices = set()  # Track indices where errors have occurred
@@ -512,7 +506,7 @@ def lesson(screen, lesson_content, title, use_letter_spacing=True):
     cursor_blink_interval = 250  # Cursor toggles every 250ms
     last_blink_time = pygame.time.get_ticks()
 
-    letter_spacing = 15 if use_letter_spacing else 2  # Conditional spacing
+    letter_spacing = 10 if use_letter_spacing else 1  # Conditional spacing
 
     # Load the "Next" and "Previous" button images
     next_button = pygame.image.load("assets/next-button.png").convert_alpha()
@@ -530,7 +524,7 @@ def lesson(screen, lesson_content, title, use_letter_spacing=True):
     circle_radius = 46
     circle_center = (config.WIDTH //4, config.HEIGHT *0.53)
     circle_thickness = 20 # Thickness of the arc
-    
+    space_pressed = False
     while running:
         screen.fill(config.BLACK)
 
@@ -541,9 +535,11 @@ def lesson(screen, lesson_content, title, use_letter_spacing=True):
 
         # Handle events
         for event in pygame.event.get():
+            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350) 
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+                
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return "Main Menu"
@@ -556,13 +552,14 @@ def lesson(screen, lesson_content, title, use_letter_spacing=True):
                         feedback = "No skipping!"
                         incorrect_sound.play()
                         error_count += 1
+                    
                     elif event.unicode == current_item[typed_index]:
                         typed_index += 1
                         feedback = "Good job!"
                         press_sound.play()
                         correct_count += 1
                         # Clear mistakes for the current index when correctly typed
-                        mistake_indices.discard(typed_index - 1)
+                        # mistake_indices.discard(typed_index - 1)
                         # Move to the next word if the current one is completed
                         if typed_index == len(current_item):
                             current_item_index += 1
@@ -575,32 +572,43 @@ def lesson(screen, lesson_content, title, use_letter_spacing=True):
                             current_item = lesson_content[current_item_index]
                             typed_index = 0
                             mistake_indices.clear()  # Reset mistakes for the new word
-                    else:
-                        # Count an error only if the current index is not already marked as mistaken
-                        if typed_index not in mistake_indices:
-                            feedback = "Try again!"
-                            incorrect_sound.play()
-                            error_count += 1
-                            mistake_indices.add(typed_index)
-
+                        
+                    elif typed_index not in mistake_indices:
+                        feedback = "Try again!"
+                        incorrect_sound.play()
+                        error_count += 1
+                        mistake_indices.add(typed_index)  # Ensure mistakes are recorded
+                elif event.key == pygame.K_SPACE:
+                    space_pressed = True  # Draw image when spacebar is pressed
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_SPACE:
+                    space_pressed = False  # Clear image when spacebar is released
+        if space_pressed:
+            screen.blit(press_space, space_key_position)
         # Draw lesson title
         draw_text(title, config.FONT,config. WHITE, config.WIDTH // 2, config.HEIGHT // 10)
 
         # Draw the current word/character in the center
-        word_surface = pygame.Surface((config.WIDTH, 50), pygame.SRCALPHA)
+        text_height = config.FONT.get_height()  # Get full font height
+        word_surface = pygame.Surface((config.WIDTH, text_height), pygame.SRCALPHA)
+
         x_offset = config.WIDTH // 2 - (config.FONT.size(current_item)[0] + (len(current_item) - 1) * letter_spacing) // 2
         for i, letter in enumerate(current_item):
-            # Determine color of each letter
-            if i < typed_index:
-                color = config.CYAN
+            if i in mistake_indices:  
+                color = config.RED  # Keep red if there was a mistake at this index
+            elif i < typed_index:
+                color = config.CYAN  # If typed correctly on first attempt, keep cyan
             elif i == typed_index:
-                color = config.RED if feedback == "Try again!" else config.WHITE
+                color = config.WHITE  # Current letter being typed is white
             else:
-                color = config.WHITE
+                color = config.WHITE  # Future letters remain white
 
             letter_surface = config.FONT.render(letter, True, color)
-            word_surface.blit(letter_surface, (x_offset, 0))
-            x_offset += config.FONT.size(letter)[0] + letter_spacing  # Add spacing between letters
+            word_surface.blit(letter_surface, (x_offset, (text_height - config.FONT.size(letter)[1]) // 2))
+            x_offset += config.FONT.size(letter)[0] + letter_spacing
+
+
+
         
         screen.blit(word_surface, (0, config.HEIGHT // 3))
 
@@ -610,10 +618,10 @@ def lesson(screen, lesson_content, title, use_letter_spacing=True):
         # Draw error count and accuracy
         total_keystrokes = correct_count + error_count
         accuracy = (correct_count / total_keystrokes) * 100 if total_keystrokes > 0 else 0
-        draw_text(f"Errors: {error_count}", config.FONT, config.WHITE,config.WIDTH * 0.7, config.HEIGHT - 400)
-        draw_text(f"Accuracy: {accuracy:.2f}%",config.FONT, config.WHITE, config.WIDTH // 2.18, config.HEIGHT - 400)
-        draw_text(f"Prev", config.FONT_SMALL, config.WHITE,125, config.HEIGHT - 40)
-        draw_text(f"Next", config.FONT_SMALL, config.WHITE,config.WIDTH - 125, config.HEIGHT - 40)
+        draw_text(f"Errors : {error_count}", config.FONT, config.WHITE,config.WIDTH * 0.7, config.HEIGHT - 400)
+        draw_text(f"Accuracy : {accuracy:.2f}%",config.FONT, config.WHITE, config.WIDTH // 2.18, config.HEIGHT - 400)
+        draw_text(f"Prev", config.FONT, config.WHITE,130, config.HEIGHT - 40)
+        draw_text(f"Next", config.FONT, config.WHITE,config.WIDTH - 130, config.HEIGHT - 40)
         
         # progress = (current_item_index + typed_index / len(current_item)) / len(lesson_content)
         # pygame.draw.rect(screen, WHITE, (progress_bar_x, progress_bar_y, progress_bar_config.width, progress_bar_height))
@@ -684,6 +692,7 @@ def run_lessons():
         ("Lesson 16 : Question Mark , Hyphen, Slash", "assets/csv/lesson16.csv"),
         ("Lesson 17 : Numeral", "assets/csv/lesson17.csv"),
         ("Lesson 18 : Symbols", "assets/csv/lesson18.csv"),
+        ("Lesson 19 : test", "assets/csv/test.csv"),
     ]
     current_index = 0  # Start with the first lesson
 
@@ -705,4 +714,4 @@ def run_lessons():
             current_index -= 1  # Move to the previous lesson
 
 # Start the lessons
-# run_lessons()# 
+run_lessons()# 

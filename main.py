@@ -4,11 +4,11 @@ import random
 import csv
 import math
 import config
-from lesson import run_lessons
-from lesson import lesson
 import Particle
+from lesson import run_lessons
 from survivor import survivor_mode
 from timetrial import time_trial_mode
+from adventure import adventure_mode
 # Initialize Pygame
 pygame.init()
 pygame.mixer.init()
@@ -937,56 +937,56 @@ def gameplay_a(player_health, mode, level_info, player_score, current_level):
 
     # Game Over menu
     return game_over_menu_a(player_score)
-def adventure_mode():
-    current_level = 1
-    player_health = 3  # Reset health for adventure mode
-    player_score = 0
-    levels = [
-        {"level": 1, "speed": 0.5, "word_count": 10},
-        {"level": 2, "speed": 0.5, "word_count": 15},
-        {"level": 3, "speed": 1, "word_count": 20},
-        {"level": 4, "speed": 1.2, "word_count": 25},
-        {"level": 5, "speed": 1.3, "word_count": 5},
-        {"level": 6, "speed": 1.5, "word_count": 5},
-        {"level": 7, "speed": 1.7, "word_count": 5},
-        {"level": 8, "speed": 2, "word_count": 5},
-        {"level": 9, "speed": 2.2, "word_count": 5},
-        {"level": 10, "speed":2.5, "word_count": 5}
-        # Add more levels as needed
-    ]
+# def adventure_mode():
+#     current_level = 1
+#     player_health = 3  # Reset health for adventure mode
+#     player_score = 0
+#     levels = [
+#         {"level": 1, "speed": 0.5, "word_count": 10},
+#         {"level": 2, "speed": 0.5, "word_count": 15},
+#         {"level": 3, "speed": 1, "word_count": 20},
+#         {"level": 4, "speed": 1.2, "word_count": 25},
+#         {"level": 5, "speed": 1.3, "word_count": 5},
+#         {"level": 6, "speed": 1.5, "word_count": 5},
+#         {"level": 7, "speed": 1.7, "word_count": 5},
+#         {"level": 8, "speed": 2, "word_count": 5},
+#         {"level": 9, "speed": 2.2, "word_count": 5},
+#         {"level": 10, "speed":2.5, "word_count": 5}
+#         # Add more levels as needed
+#     ]
 
-    selected_level = select_adventure_level()
-    if selected_level == "Main Menu":
-        return "Main Menu"  # Return to main menu without continuing
+#     selected_level = select_adventure_level()
+#     if selected_level == "Main Menu":
+#         return "Main Menu"  # Return to main menu without continuing
 
-    # Convert the selected level (1-indexed) to the appropriate index
-    current_level = int(selected_level)  # Selected level is returned as a number (1-10)
+#     # Convert the selected level (1-indexed) to the appropriate index
+#     current_level = int(selected_level)  # Selected level is returned as a number (1-10)
 
-    # current_level = selected_level
+#     # current_level = selected_level
 
-    while current_level <= len(levels):
-        level_info = levels[current_level - 1]  # Get the current level's info
+#     while current_level <= len(levels):
+#         level_info = levels[current_level - 1]  # Get the current level's info
 
-        # Call the gameplay function, passing relevant information
-        result = gameplay_a(player_health, mode="Adventure", level_info=level_info, player_score=player_score, current_level=current_level)
+#         # Call the gameplay function, passing relevant information
+#         result = gameplay_a(player_health, mode="Adventure", level_info=level_info, player_score=player_score, current_level=current_level)
 
-        if isinstance(result, str):  # If result is a string (like "Game Over" or "Main Menu")
-            if result == "Game Over":
-                return game_over_menu_a(player_score)
-            elif result == "Main Menu":
-                return main_menu()
-        else:
-            # Update player health and score between levels
-            player_health = result.get("player_health", player_health)  # Use .get() to avoid KeyError
-            player_score = result.get("player_score", player_score)
+#         if isinstance(result, str):  # If result is a string (like "Game Over" or "Main Menu")
+#             if result == "Game Over":
+#                 return game_over_menu_a(player_score)
+#             elif result == "Main Menu":
+#                 return main_menu()
+#         else:
+#             # Update player health and score between levels
+#             player_health = result.get("player_health", player_health)  # Use .get() to avoid KeyError
+#             player_score = result.get("player_score", player_score)
 
-            # Optionally, show a level complete screen
-            level_complete_screen(level_info["level"], player_score)
+#             # Optionally, show a level complete screen
+#             level_complete_screen(level_info["level"], player_score)
 
-            # Move to the next level
-            current_level += 1
-    # If all levels are completed
-    return game_completed_screen(player_score)
+#             # Move to the next level
+#             current_level += 1
+#     # If all levels are completed
+#     return game_completed_screen(player_score)
 
 # In your main game loop
 menu_option = main_menu()

@@ -1,7 +1,8 @@
 import pygame
-
+import csv
+import config
 class Boss:
-    def __init__(self, x, y, health, animation_speed=200):
+    def __init__(self, x, y, health, animation_speed=200, word_file="assets/word.csv"):
         """
         Initializes the Boss object.
 
@@ -10,12 +11,13 @@ class Boss:
             y (int): The y-coordinate of the boss.
             health (int): The boss's total health.
             animation_speed (int): Time in milliseconds for each sprite frame.
+            word_file (str): Path to the CSV file containing boss words.
         """
-        self.x = x
+        self.x = config.WIDTH // 2.4
         self.y = y
         self.health = health
         self.max_health = health
-        self.boss_words = ["bossword1", "bossword2", "bossword3"]  # Example words
+        self.boss_words = self.load_words(word_file)  # Load words from CSV
         self.current_word_index = 0
         # Load boss sprites
         self.sprites = [
@@ -31,7 +33,31 @@ class Boss:
         # Health bar dimensions
         self.health_bar_width = 300
         self.health_bar_height = 20
-        self.health_bar_offset = 50  # Offset above the boss sprite
+        self.health_bar_offset = 10  # Offset above the boss sprite
+
+    def load_words(self, word_file):
+        """
+        Loads words from a CSV file.
+
+        Args:
+            word_file (str): Path to the CSV file.
+
+        Returns:
+            list: A list of words loaded from the file.
+        """
+        words = []
+        try:
+            with open(word_file, newline='', encoding='utf-8') as csvfile:
+                reader = csv.reader(csvfile)  # Automatically handles commas as delimiters
+                for row in reader:
+                    for word in row:  # Split each row into individual words
+                        cleaned_word = word.strip()  # Remove leading/trailing spaces
+                        if cleaned_word:  # Skip empty words
+                            words.append(cleaned_word)
+        except FileNotFoundError:
+            print(f"Error: {word_file} not found. Using default boss words.")
+            words = ["bossword1", "bossword2", "bossword3"]  # Default words
+        return words
 
     def update(self, delta_time):
         """
@@ -83,6 +109,7 @@ class Boss:
             bool: True if the boss's health is 0, False otherwise.
         """
         return self.health <= 0
+
     def get_next_word(self):
         """
         Returns the next word that the player needs to type for the boss.
@@ -93,4 +120,3 @@ class Boss:
             return word
         else:
             return None  # No more words, boss is defeated
-
