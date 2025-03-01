@@ -133,24 +133,33 @@ def draw_text(text, font, color, x, y, center=True):
 # Constants
 BLINK_INTERVAL = 500  # Milliseconds (adjust to change blink speed)
 
-# Variable to track time
+# Variables
+blink_enabled = False  # Toggle blinking effect
 last_blink_time = 1
 show_highlight = False  # Toggle state
+
+def toggle_blink():
+    global blink_enabled
+    blink_enabled = not blink_enabled  # Enable/Disable blinking
+
 # Draw keyboard layout and highlight current key
 def draw_keyboard_layout(current_char):
-    # Draw the base keyboard layout
     global last_blink_time, show_highlight
-    screen.blit(blank, (config.WIDTH/5 , config.HEIGHT - 350))  # Display at the bottom of the screen
-    current_time = pygame.time.get_ticks()
-    if current_time - last_blink_time > BLINK_INTERVAL:
-        show_highlight = not show_highlight  # Toggle visibility
-        last_blink_time = current_time  # Reset timer
+    screen.blit(keyboard_image, (config.WIDTH / 5, config.HEIGHT - 350))  # Display at the bottom of the screen
+    
+    if blink_enabled:
+        current_time = pygame.time.get_ticks()
+        if current_time - last_blink_time > BLINK_INTERVAL:
+            show_highlight = not show_highlight  # Toggle visibility
+            last_blink_time = current_time  # Reset timer
+    else:
+        show_highlight = True  # Ensure highlight is always shown if blinking is disabled
 
     # Highlight the key only if blinking state is "on"
     if show_highlight:
         if current_char == " ":
-            space_key_position = (config.WIDTH/5 , config.HEIGHT - 350)  
-            screen.blit(key_space, space_key_position)  
+            space_key_position = (config.WIDTH / 5, config.HEIGHT - 350)
+            screen.blit(key_space, space_key_position)
         elif current_char == "a":
             space_key_position = (config.WIDTH/5 , config.HEIGHT - 350) 
             screen.blit(key_a, space_key_position)
@@ -714,4 +723,4 @@ def run_lessons():
             current_index -= 1  # Move to the previous lesson
 
 # Start the lessons
-run_lessons()# 
+# run_lessons()# 

@@ -4,12 +4,13 @@ import random
 import csv
 import math
 import config
+import time
 from lesson import run_lessons
 from lesson import lesson
 import Particle
 from FallingWord import FallingWord
 from Spaceship import Spaceship
-
+from Effect import Explosion
 from pause import pause_game
 # Initialize Pygame
 pygame.init()
@@ -31,7 +32,7 @@ game_over_sound.set_volume(0.05)
 correct_sound.set_volume(0.05)
 select_sound.set_volume(0.05)  # Adjust volume 
 
-player_health = 3
+player_health = 1
 
 def draw_health(health, x, y):
     for i in range(health):
@@ -46,13 +47,18 @@ def draw_text(text, font, color, x, y, blink=False):
         screen.blit(text_surface, text_rect)
 
 def game_over_menu_s(player_score):
+    clock = pygame.time.Clock()
+    running = True
     game_over_sound.play()
     options = ["Restart", "Main Menu"]
     current_selection = 0
     button_height = 60  # config.Height of each button
-    spacing = 120  # Vertical spacing between buttons
-    clock = pygame.time.Clock()
-    while True:
+    spacing = 100  # Vertical spacing between buttons
+    
+    score_display = 1
+    start_time = time.time()
+    
+    while running:
         # Draw everything
         
         screen.fill(config.BLACK)  # Fill the screen with the background color
@@ -60,11 +66,13 @@ def game_over_menu_s(player_score):
             particle.draw()
             particle.update()
 
-        draw_text("Game Over", pygame.font.Font("assets/mania.ttf", 60), config.WHITE, config.WIDTH // 2, config.HEIGHT // 3)
-        draw_text(f"Total Score : {player_score}", pygame.font.Font("assets/mania.ttf", 42), config.YELLOW, config.WIDTH // 2, config.HEIGHT // 2.15)
-
+        draw_text("Game Over", pygame.font.Font("assets/Prototype.ttf", 100), config.WHITE, config.WIDTH // 2, config.HEIGHT // 3)
+        draw_text("Total Score", pygame.font.Font("assets/Prototype.ttf", 60), config.YELLOW, config.WIDTH // 2, config.HEIGHT // 2.15)
+        if time.time() - start_time >= score_display:
+            draw_text(f"{player_score}", pygame.font.Font("assets/Prototype.ttf", 60), config.YELLOW, config.WIDTH // 2, config.HEIGHT // 1.75)
+        
         for i, option in enumerate(options):
-            button_rect = pygame.Rect(config.WIDTH // 2 - 100, config.HEIGHT - 400 + i * spacing, 200, button_height)
+            button_rect = pygame.Rect(config.WIDTH // 2 - 125, config.HEIGHT - 300 + i * spacing, 250, button_height)
             if i == current_selection:
                 pygame.draw.rect(screen, config.WHITE, button_rect)
                 pygame.draw.rect(screen, config.YELLOW, button_rect, 5)
@@ -97,37 +105,31 @@ def game_over_menu_s(player_score):
 
 def survivor_mode(player_health):
     player_score = 0
-    current_score = 0  # Total score accumulated throughout the game
-    score_multiplier = 1  # Initialize the score multiplier
-    max_multiplier = 10  # Set the maximum multiplier
+    score_multiplier = 1  
+    max_multiplier = 10  
     clock = pygame.time.Clock()
     falling_words = []
     spaceship = Spaceship()
     player_word = ""
-    base_speed = 0.5  # Starting speed
-    # Variables for displaying multiplier streak
-    multiplier_streak = 0
+    base_speed = 0.5  
     multiplier_display_timer = 0
     running = True
+    explosions = []
 
     while running and player_health > 0:
-        speed_increase = (player_score // 100000) * 1  # Increase speed by 0.5 for every 100,000 score
+        speed_increase = (player_score // 100000) * 1  
         falling_word_speed = base_speed + speed_increase
 
-        # Draw everything
-        screen.fill(config.BLACK)  # Fill the screen with the background color
+        screen.fill(config.BLACK)  
         for particle in Particle.particles:
             particle.draw()
             particle.update()
 
-        # Display the falling word for the player to type
         if len(falling_words) < 4 and random.randint(0, 100) < 2:
             falling_words.append(FallingWord(falling_words, falling_word_speed))
 
-        # Display the input word
         draw_text(player_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT - 150)
 
-        # Event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -136,9 +138,8 @@ def survivor_mode(player_health):
                     result = pause_game()
                     if result == "Main Menu":
                         running = False
-
                 elif event.key == pygame.K_BACKSPACE:
-                    player_word = player_word[:-1]  # Remove the last character from the input word
+                    player_word = player_word[:-1]  
                 elif event.key != pygame.K_SPACE:  
                     player_word += event.unicode
                     
@@ -150,62 +151,74 @@ def survivor_mode(player_health):
                     if correct_word:
                         correct_sound.play()
                         word_length = len(correct_word.word)
-                        
-                        # multiplier
                         player_score += word_length * 1000 * score_multiplier
                         score_multiplier = min(score_multiplier + 1, max_multiplier)
                         spaceship.shoot_missile(correct_word, missile_image)
                         player_word = ""
-                    
-        # Update and draw missiles
-        spaceship.update_missiles(falling_words)
+
+        # Update missiles and check for collisions
+        missiles_to_remove = []
+        words_to_remove = []
+        
+        for missile in spaceship.missiles:
+            missile.update()
+            for word in falling_words:
+                if missile.rect.colliderect(word.rect):
+                    explosions.append(Explosion(word.rect.centerx, word.rect.centery))
+                    words_to_remove.append(word)
+                    missiles_to_remove.append(missile)
+
+        # Remove missiles and words that collided
+        for missile in missiles_to_remove:
+            spaceship.missiles.remove(missile)
+        for word in words_to_remove:
+            falling_words.remove(word)
+
         spaceship.draw_missiles()
 
         # Update and draw falling words
         for word in falling_words:
-            if word.update(player_health):  # Pass player_health as an argument
+            if word.update(player_health):  
                 falling_words.remove(word)
             else:
                 word.draw(player_word)
 
+        # Update and draw explosions
+        for explosion in explosions[:]:
+            explosion.update()
+            explosion.draw(screen)
+            if explosion.finished:
+                explosions.remove(explosion)
+
         # Check deadzone 
         for word in falling_words:
             if word.rect.y > config.DEADZONE_LINE:
-                    player_health -= 1
-                    loss_hp_sound.play()
-                    score_multiplier = 1  # Reset multiplier when health decreases
-                    falling_words.remove(word)
+                player_health -= 1
+                loss_hp_sound.play()
+                score_multiplier = 1  
+                falling_words.remove(word)
 
-        # Display player score and health
-        draw_text(f"Score", font, config.WHITE,60, 20)  # Top left
-        draw_text(f"{player_score}", font, config.WHITE, 60, 55)  # Top left
-        #draw_text(f"CountingScore : {current_score}", font, config.WHITE, 80, 60)  # Display total score
-        draw_health(player_health, 3, 70) # Top right
+        # Display score and health
+        draw_text(f"Score", font, config.WHITE, 60, 20)
+        draw_text(f"{player_score}", font, config.WHITE, 60, 55)
+        draw_health(player_health, 3, 70)
 
-
-
-        # Display multiplier streak
         if multiplier_display_timer > 0:
             draw_text(f"Multiplier: {score_multiplier}x", font, config.WHITE, config.WIDTH - 150, 20)
             multiplier_display_timer -= 1
 
-        # Display the spaceship
         spaceship.update()
         spaceship.draw()
 
-        # Remove words that have fallen off the screen
-        falling_words = [word for word in falling_words if word.rect.y < config.HEIGHT]
-
-        # Update multiplier display timer
         if score_multiplier > 1:
-            multiplier_display_timer = 120  # Reset the display timer if multiplier is active
+            multiplier_display_timer = 120  
 
         if player_health <= 0:
             game_over_sound.play()
         pygame.display.flip()
         clock.tick(config.FPS)
 
-    # Game Over menu
     return game_over_menu_s(player_score)
 
-# survivor_mode(player_health)
+
+survivor_mode(player_health)# 
