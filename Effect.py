@@ -21,11 +21,11 @@ explosion_frames = [
 
 class Explosion:
     def __init__(self, x, y):
-        self.frames = explosion_frames  # Use preloaded frames
+        self.frames = explosion_frames  # Ensure explosion frames are loaded
         self.index = 0
         self.image = self.frames[self.index]
         self.rect = self.image.get_rect(center=(x, y))
-        self.animation_speed = 5  # Control the speed of animation
+        self.animation_speed = 5  # Control animation speed
         self.counter = 0
         self.finished = False
 
@@ -43,3 +43,4 @@ class Explosion:
         """Draw the explosion if not finished"""
         if not self.finished:
             screen.blit(self.image, self.rect)
+

@@ -110,27 +110,32 @@ def adventure_mode():
     state_timer = 0
     boss = Boss(x=config.WIDTH // 2 - 100, y=100, health=100)
     falling_words = []
-    boss_health = 10  # Boss health for State 3
     remembered_words = []
-    explosions = []  # Store active explosions
 
-    # State-specific counters
-    correct_word_count = 0  # Tracks correct words in State 1
-    wave_count = 0  # Tracks waves completed in State 2
-    bonus_timer = 40 * 1000  # 15 seconds for State 4
-    max_wave_count = 3  # Maximum waves before transitioning to state 3
-    waves_completed = 0  # Track the waves completed in state 2
+    # Boss health and waves
+    boss_health = 10  
+    correct_word_count = 0  
+    wave_count = 0  
+    max_wave_count = 3  
+    waves_completed = 0  
 
+    bonus_timer = 10 * 1000  # 40 seconds for State 4
     running = True
-    last_time = pygame.time.get_ticks()  # Initialize last_time to current time
+    last_time = pygame.time.get_ticks()
+
+    # Effects
+    explosions = []  # Stores explosion effects
+    correct_word_positions = []  # Stores positions for laser lines
 
     while running:
         screen.fill(config.BLACK)
 
+        # Update particles
         for particle in Particle.particles:
             particle.update()
             particle.draw()
 
+        # Handle events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -142,7 +147,9 @@ def adventure_mode():
                     player_word = player_word[:-1]
                 elif event.key != pygame.K_SPACE:
                     player_word += event.unicode
-        for word in falling_words:
+
+        # Handle words falling past the deadzone
+        for word in falling_words[:]:
             if word.rect.y > config.DEADZONE_LINE:
                 player_health -= 1
                 loss_hp_sound.play()
@@ -156,10 +163,11 @@ def adventure_mode():
         # Draw player health
         draw_health(player_health, 20, 20)
 
-        # Handle states
+        # Handle game states
         if state == 1:
             draw_text(player_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT - 150)
-            # Spawn new words periodically
+
+            # Spawn words
             if len(falling_words) == 0 or (state_timer > 2000 and len(falling_words) < 3):
                 falling_words.append(FallingWordAdventure(existing_words=[], speed=1 + random.random()))
                 state_timer = 0
@@ -171,16 +179,17 @@ def adventure_mode():
                     player_score += len(word.word) * 1000
                     spaceship.shoot_missile(word, missile_image)
                     remembered_words.append(word.word)
-                    explosions.append(Explosion(word.rect.x, word.rect.y))  # Add explosion
+                    explosions.append(Explosion(word.rect.centerx, word.rect.centery))
+
+                    # Store correct word position for laser effect
+                    correct_word_positions.append((spaceship.rect.center, word.rect.center))
+                    
                     player_word = ""
                     falling_words.remove(word)
                     correct_word_count += 1
 
                 word.update(player_health)
-                word.draw(player_word)  # Only pass player_word here for current word
-
-                if word.rect.y > config.HEIGHT:
-                    falling_words.remove(word)
+                word.draw(player_word)
 
             if correct_word_count >= 3:
                 state = 2
@@ -193,9 +202,10 @@ def adventure_mode():
 
         elif state == 2:
             draw_text(player_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT - 150)
+
             if waves_completed < max_wave_count:
                 if state_timer < 3000 and len(falling_words) < 3:
-                    for _ in range(random.randint(3, 3)):
+                    for _ in range(3):
                         falling_words.append(FallingWordAdventure(existing_words=[], speed=1 + random.random()))
                     wave_count += 1
                     waves_completed += 1
@@ -212,39 +222,49 @@ def adventure_mode():
                     player_score += len(word.word) * 1000
                     spaceship.shoot_missile(word, missile_image)
                     remembered_words.append(word.word)
-                    explosions.append(Explosion(word.rect.x, word.rect.y))  # Add explosion
+                    explosions.append(Explosion(word.rect.centerx, word.rect.centery))
+
+                    # Store correct word position for laser effect
+                    correct_word_positions.append((spaceship.rect.center, word.rect.center))
+
                     player_word = ""
                     falling_words.remove(word)
 
                 word.update(player_health)
                 word.draw(player_word)
 
-                if word.rect.y > config.HEIGHT:
-                    falling_words.remove(word)
-                if player_health <= 0:
-                    game_over_sound.play()
-                    running = False
+            if player_health <= 0:
+                game_over_sound.play()
+                running = False
 
         elif state == 3:
             draw_text(player_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT - 150)
+
+            # Draw and update the boss
             boss.draw(screen)
             boss.update(delta_time)
 
+            # Boss word handling
             if not hasattr(boss, "current_word") or boss.current_word is None:
                 boss.current_word = boss.get_next_word()
 
             if boss.current_word:
                 draw_text(boss.current_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT // 2)
 
+            # Player input check
             if player_word.strip() == boss.current_word:
                 correct_sound.play()
-                boss.take_damage(1)
-                player_score += 2000
-                player_word = ""
+                boss.take_damage(1)  
+                player_score += 2000  
+                player_word = ""  
                 boss.current_word = boss.get_next_word()
 
+                # Add explosion effect at boss position
+                # explosions.append(Explosion(boss.rect.centerx, boss.rect.centery))
+
+            # Check if boss is defeated
             if boss.is_defeated():
-                state = 4
+                state = 4  
                 state_timer = 0
 
             if player_health <= 0:
@@ -253,7 +273,9 @@ def adventure_mode():
         elif state == 4:
             draw_text("Bonus Round!", font2, config.YELLOW, config.WIDTH // 2, 200)
             draw_text("Type the previously memorized words!", font2, config.YELLOW, config.WIDTH // 2, 280)
+            
             draw_text(player_word, font3, config.CYAN, config.WIDTH // 2, config.HEIGHT - 400)
+
             remaining_time = max(0, bonus_timer // 1000)
             draw_text(f"Time Left: {remaining_time}", font, config.RED, config.WIDTH - 150, 100)
 
@@ -272,21 +294,32 @@ def adventure_mode():
             if bonus_timer <= 0:
                 running = False
 
+        # Draw laser lines
+        for start_pos, end_pos in correct_word_positions:
+            pygame.draw.line(screen, config.WHITE, start_pos, end_pos, 10)
+
+        # Clear laser effects after a short duration
+        correct_word_positions.clear()
+
+        # Update explosions
         for explosion in explosions[:]:
             explosion.update()
             explosion.draw(screen)
             if explosion.finished:
                 explosions.remove(explosion)
 
+        # Update and draw spaceship
         spaceship.update()
         spaceship.draw()
 
+        # Draw score
         draw_text(f"Score: {player_score}", font, config.WHITE, config.WIDTH - 150, 20)
 
         pygame.display.flip()
         clock.tick(config.FPS)
 
     return game_over_menu_a(player_score)
+
 
 
 
