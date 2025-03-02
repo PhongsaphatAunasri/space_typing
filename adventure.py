@@ -24,13 +24,17 @@ loss_hp_sound = pygame.mixer.Sound("sounds/losshp.wav")
 game_over_sound = pygame.mixer.Sound("sounds/gameover.wav")
 correct_sound = pygame.mixer.Sound("sounds/correct.wav")
 select_sound = pygame.mixer.Sound("sounds/select.wav")
-# bonus_sound = pygame.mixer.Sound("sounds/bonus.wav")
+boom_sound = pygame.mixer.Sound("sounds/boom.wav")
+laser_sound = pygame.mixer.Sound("sounds/laser.wav")
+press_sound = pygame.mixer.Sound("sounds/press.wav")
 
 loss_hp_sound.set_volume(0.05)
 game_over_sound.set_volume(0.05)
 correct_sound.set_volume(0.05)
 select_sound.set_volume(0.05)
-# bonus_sound.set_volume(0.05)
+boom_sound.set_volume(0.05)
+laser_sound.set_volume(0.05)
+press_sound.set_volume(0.05) 
 
 def draw_health(health, x, y):
     for i in range(health):
@@ -40,7 +44,16 @@ def draw_text(text, font, color, x, y):
     text_surface = font.render(text, True, color)
     text_rect = text_surface.get_rect(center=(x, y))
     screen.blit(text_surface, text_rect)
-
+def draw_text_left_aligned(text, font, color, x, y):
+    text_surface = font.render(text, True, color)
+    text_rect = text_surface.get_rect(topleft=(x, y))  # Align to the left
+    screen.blit(text_surface, text_rect)
+ # Grey bar with height 50px
+ # Grey bar with height 50px
+def draw_text_right_aligned(text, font, color, x, y):
+    text_surface = font.render(text, True, color)
+    text_rect = text_surface.get_rect(topright=(x, y))  # Align to the right
+    screen.blit(text_surface, text_rect)
 
 def game_over_menu_a(player_score):
     clock = pygame.time.Clock()
@@ -140,6 +153,7 @@ def adventure_mode():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
+                press_sound.play()
                 if event.key == pygame.K_ESCAPE:
                     if pause_game() == "Main Menu":
                         running = False
@@ -175,10 +189,11 @@ def adventure_mode():
             # Process words
             for word in falling_words[:]:
                 if player_word == word.word:
-                    correct_sound.play()
+                    laser_sound.play()
                     player_score += len(word.word) * 1000
                     spaceship.shoot_missile(word, missile_image)
                     remembered_words.append(word.word)
+                    boom_sound.play()
                     explosions.append(Explosion(word.rect.centerx, word.rect.centery))
 
                     # Store correct word position for laser effect
@@ -218,10 +233,11 @@ def adventure_mode():
 
             for word in falling_words[:]:
                 if player_word == word.word:
-                    correct_sound.play()
+                    laser_sound.play()
                     player_score += len(word.word) * 1000
                     spaceship.shoot_missile(word, missile_image)
                     remembered_words.append(word.word)
+                    boom_sound.play()
                     explosions.append(Explosion(word.rect.centerx, word.rect.centery))
 
                     # Store correct word position for laser effect
@@ -296,14 +312,22 @@ def adventure_mode():
 
         # Draw laser lines
         for start_pos, end_pos in correct_word_positions:
-            pygame.draw.line(screen, config.WHITE, start_pos, end_pos, 10)
+            # Outer yellow line (thickness 2)
+            adjusted_start = (start_pos[0], start_pos[1] - 40)
+            pygame.draw.line(screen, config.CYAN, adjusted_start, end_pos, 10)  
 
+            # Middle white line (thickness 4)
+            pygame.draw.line(screen, config.WHITE, adjusted_start, end_pos, 4)  
+            
+            pygame.draw.circle(screen, config.CYAN, adjusted_start, 10)
+            pygame.draw.circle(screen, config.WHITE, adjusted_start, 6)
         # Clear laser effects after a short duration
         correct_word_positions.clear()
 
         # Update explosions
         for explosion in explosions[:]:
             explosion.update()
+            
             explosion.draw(screen)
             if explosion.finished:
                 explosions.remove(explosion)
@@ -312,8 +336,10 @@ def adventure_mode():
         spaceship.update()
         spaceship.draw()
 
-        # Draw score
-        draw_text(f"Score: {player_score}", font, config.WHITE, config.WIDTH - 150, 20)
+        pygame.draw.rect(screen, config.WHITE, (0, 0, config.WIDTH, 54)) 
+        pygame.draw.rect(screen, config.DARKGREY, (0, 0, config.WIDTH, 50)) 
+        draw_text_left_aligned(f"Score {player_score:,}", font, config.WHITE, 5, 0)
+        draw_health(player_health, config.WIDTH - 150, 5)
 
         pygame.display.flip()
         clock.tick(config.FPS)

@@ -26,17 +26,24 @@ loss_hp_sound = pygame.mixer.Sound("sounds/losshp.wav")
 game_over_sound = pygame.mixer.Sound("sounds/gameover.wav")
 correct_sound = pygame.mixer.Sound("sounds/correct.wav")
 select_sound = pygame.mixer.Sound("sounds/select.wav")
+boom_sound = pygame.mixer.Sound("sounds/boom.wav")
+laser_sound = pygame.mixer.Sound("sounds/laser.wav")
+press_sound = pygame.mixer.Sound("sounds/press.wav")
 #set volume
 loss_hp_sound.set_volume(0.05)
 game_over_sound.set_volume(0.05)
 correct_sound.set_volume(0.05)
-select_sound.set_volume(0.05)  # Adjust volume 
+select_sound.set_volume(0.05)  
+boom_sound.set_volume(0.05)
+laser_sound.set_volume(0.05)
+press_sound.set_volume(0.05) 
 
-player_health = 1
+player_health = 3
 
 def draw_health(health, x, y):
     for i in range(health):
-        screen.blit(heart_image, (x + i * (heart_image.get_width() + 10), y))   
+        screen.blit(heart_image, (x + (player_health - 1 - i) * (heart_image.get_width() + 10), y))
+
 def draw_text(text, font, color, x, y, blink=False):
     text_surface = font.render(text, True, color)
     text_rect = text_surface.get_rect(center=(x, y))
@@ -45,6 +52,19 @@ def draw_text(text, font, color, x, y, blink=False):
         screen.blit(text_surface, text_rect)
     elif not blink:
         screen.blit(text_surface, text_rect)
+def draw_text_left_aligned(text, font, color, x, y):
+    text_surface = font.render(text, True, color)
+    text_rect = text_surface.get_rect(topleft=(x, y))  # Align to the left
+    screen.blit(text_surface, text_rect)
+ # Grey bar with height 50px
+ # Grey bar with height 50px
+def draw_text_right_aligned(text, font, color, x, y):
+    text_surface = font.render(text, True, color)
+    text_rect = text_surface.get_rect(topright=(x, y))  # Align to the right
+    screen.blit(text_surface, text_rect)
+
+# Example Usage
+
 
 def game_over_menu_s(player_score):
     clock = pygame.time.Clock()
@@ -69,7 +89,7 @@ def game_over_menu_s(player_score):
         draw_text("Game Over", pygame.font.Font("assets/Prototype.ttf", 100), config.WHITE, config.WIDTH // 2, config.HEIGHT // 3)
         draw_text("Total Score", pygame.font.Font("assets/Prototype.ttf", 60), config.YELLOW, config.WIDTH // 2, config.HEIGHT // 2.15)
         if time.time() - start_time >= score_display:
-            draw_text(f"{player_score}", pygame.font.Font("assets/Prototype.ttf", 60), config.YELLOW, config.WIDTH // 2, config.HEIGHT // 1.75)
+            draw_text(f"{player_score:,}", pygame.font.Font("assets/Prototype.ttf", 60), config.YELLOW, config.WIDTH // 2, config.HEIGHT // 1.75)
         
         for i, option in enumerate(options):
             button_rect = pygame.Rect(config.WIDTH // 2 - 125, config.HEIGHT - 300 + i * spacing, 250, button_height)
@@ -106,27 +126,37 @@ def game_over_menu_s(player_score):
 def survivor_mode(player_health):
     player_score = 0
     score_multiplier = 1  
-    max_multiplier = 10  
+    max_multiplier = 99999
     clock = pygame.time.Clock()
     falling_words = []
+    fast_falling_words = []  # New word group for fast words
     spaceship = Spaceship()
     player_word = ""
     base_speed = 0.5  
+    current_speed = base_speed
+    correct_word_count = 0  # Track correct words
+    last_fast_word_count = 0  # Track when last fast word was added
     multiplier_display_timer = 0
     running = True
+    lasers = []
     explosions = []
 
     while running and player_health > 0:
-        speed_increase = (player_score // 100000) * 1  
-        falling_word_speed = base_speed + speed_increase
+        falling_word_speed = current_speed
 
         screen.fill(config.BLACK)  
         for particle in Particle.particles:
             particle.draw()
             particle.update()
 
+        # Regular falling words (at variable speed)
         if len(falling_words) < 4 and random.randint(0, 100) < 2:
             falling_words.append(FallingWord(falling_words, falling_word_speed))
+
+        # Spawn one fast-falling word every 25 correct words
+        if correct_word_count >= last_fast_word_count + 10:
+            fast_falling_words.append(FallingWord(fast_falling_words, 3))
+            last_fast_word_count = correct_word_count  # Update last spawn count
 
         draw_text(player_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT - 150)
 
@@ -134,6 +164,7 @@ def survivor_mode(player_health):
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
+                press_sound.play()
                 if event.key == pygame.K_ESCAPE:
                     result = pause_game()
                     if result == "Main Menu":
@@ -144,67 +175,76 @@ def survivor_mode(player_health):
                     player_word += event.unicode
                     
                     correct_word = None
-                    for word in falling_words:
+                    all_falling_words = falling_words + fast_falling_words
+                    for word in all_falling_words:
                         if player_word == word.word:
                             correct_word = word
                             break
                     if correct_word:
-                        correct_sound.play()
+                        laser_sound.play()
                         word_length = len(correct_word.word)
-                        player_score += word_length * 1000 * score_multiplier
+                        player_score += word_length * 100 * score_multiplier
                         score_multiplier = min(score_multiplier + 1, max_multiplier)
-                        spaceship.shoot_missile(correct_word, missile_image)
+                        lasers.append((spaceship.rect.centerx, spaceship.rect.top, correct_word.rect.centerx, correct_word.rect.centery))
+                        boom_sound.play()
+                        explosions.append(Explosion(correct_word.rect.centerx, correct_word.rect.centery))
+                        
+                        # Remove word from correct group
+                        if correct_word in falling_words:
+                            falling_words.remove(correct_word)
+                        elif correct_word in fast_falling_words:
+                            fast_falling_words.remove(correct_word)
+
                         player_word = ""
 
-        # Update missiles and check for collisions
-        missiles_to_remove = []
-        words_to_remove = []
-        
-        for missile in spaceship.missiles:
-            missile.update()
-            for word in falling_words:
-                if missile.rect.colliderect(word.rect):
-                    explosions.append(Explosion(word.rect.centerx, word.rect.centery))
-                    words_to_remove.append(word)
-                    missiles_to_remove.append(missile)
+                        # Update speed based on correct words
+                        correct_word_count += 1
+                        if correct_word_count % 10 == 0:
+                            current_speed += 0.5  # Increase speed
+                        if correct_word_count % 30 == 0:
+                            current_speed = base_speed  # Reset to base speed
 
-        # Remove missiles and words that collided
-        for missile in missiles_to_remove:
-            spaceship.missiles.remove(missile)
-        for word in words_to_remove:
-            falling_words.remove(word)
+        # Draw lasers
+        for laser in lasers:
+            pygame.draw.line(screen, config.CYAN, (laser[0], laser[1]), (laser[2], laser[3]), 10)
+            pygame.draw.line(screen, config.WHITE, (laser[0], laser[1]), (laser[2], laser[3]), 4)
+            pygame.draw.circle(screen, config.CYAN,(laser[0], laser[1]), 10)
+            pygame.draw.circle(screen, config.WHITE,(laser[0], laser[1]), 6)
+        lasers.clear()
 
-        spaceship.draw_missiles()
-
-        # Update and draw falling words
-        for word in falling_words:
+        # Update and draw regular falling words
+        for word in falling_words[:]:
             if word.update(player_health):  
                 falling_words.remove(word)
             else:
                 word.draw(player_word)
 
-        # Update and draw explosions
-        for explosion in explosions[:]:
-            explosion.update()
-            explosion.draw(screen)
-            if explosion.finished:
-                explosions.remove(explosion)
+        # Update and draw fast falling words
+        for word in fast_falling_words[:]:
+            if word.update(player_health):  
+                fast_falling_words.remove(word)
+            else:
+                word.draw(player_word)
 
-        # Check deadzone 
-        for word in falling_words:
+        # Check deadzone  
+        for word in falling_words + fast_falling_words:
             if word.rect.y > config.DEADZONE_LINE:
                 player_health -= 1
                 loss_hp_sound.play()
-                score_multiplier = 1  
-                falling_words.remove(word)
+                score_multiplier = 2  
+                if word in falling_words:
+                    falling_words.remove(word)
+                elif word in fast_falling_words:
+                    fast_falling_words.remove(word)
 
         # Display score and health
-        draw_text(f"Score", font, config.WHITE, 60, 20)
-        draw_text(f"{player_score}", font, config.WHITE, 60, 55)
-        draw_health(player_health, 3, 70)
+        pygame.draw.rect(screen, config.WHITE, (0, 0, config.WIDTH, 54)) 
+        pygame.draw.rect(screen, config.DARKGREY, (0, 0, config.WIDTH, 50)) 
+        draw_text_left_aligned(f"Score {player_score:,}", font, config.WHITE, 5, 0)
+        draw_health(player_health, config.WIDTH - 150, 5)
 
         if multiplier_display_timer > 0:
-            draw_text(f"Multiplier: {score_multiplier}x", font, config.WHITE, config.WIDTH - 150, 20)
+            draw_text_left_aligned(f"{score_multiplier - 1}x Streak", font, config.LIGHTYELLOW, config.WIDTH // 4.8, 0)
             multiplier_display_timer -= 1
 
         spaceship.update()
@@ -219,6 +259,10 @@ def survivor_mode(player_health):
         clock.tick(config.FPS)
 
     return game_over_menu_s(player_score)
+
+
+
+
 
 
 survivor_mode(player_health)# 
