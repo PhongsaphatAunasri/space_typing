@@ -29,14 +29,16 @@ select_sound = pygame.mixer.Sound("sounds/select.wav")
 boom_sound = pygame.mixer.Sound("sounds/boom.wav")
 laser_sound = pygame.mixer.Sound("sounds/laser.wav")
 press_sound = pygame.mixer.Sound("sounds/press.wav")
+incorrect_sound = pygame.mixer.Sound("sounds/incorrect.wav")
 #set volume
-loss_hp_sound.set_volume(0.05)
-game_over_sound.set_volume(0.05)
+loss_hp_sound.set_volume(0.2)
+game_over_sound.set_volume(0.2)
 correct_sound.set_volume(0.05)
-select_sound.set_volume(0.05)  
+select_sound.set_volume(0.2)  
 boom_sound.set_volume(0.05)
-laser_sound.set_volume(0.05)
-press_sound.set_volume(0.05) 
+laser_sound.set_volume(0.2)
+press_sound.set_volume(0.2) 
+incorrect_sound.set_volume(0.1)
 
 player_health = 3
 
@@ -52,6 +54,12 @@ def draw_text(text, font, color, x, y, blink=False):
         screen.blit(text_surface, text_rect)
     elif not blink:
         screen.blit(text_surface, text_rect)
+def draw_text_top(text, font, color, x, y):
+    text_surface = font.render(text, True, color)
+    text_rect = text_surface.get_rect()
+    text_rect.centerx = x  # Center horizontally
+    text_rect.top = y  # Position from the top
+    screen.blit(text_surface, text_rect)
 def draw_text_left_aligned(text, font, color, x, y):
     text_surface = font.render(text, True, color)
     text_rect = text_surface.get_rect(topleft=(x, y))  # Align to the left
@@ -116,10 +124,10 @@ def game_over_menu_s(player_score):
                     elif current_selection == 1:  # Main Menu option
                         return "Main Menu"
                 elif event.key == pygame.K_UP:
-                    select_sound.play()
+                    press_sound.play()
                     current_selection = (current_selection - 1) % len(options)
                 elif event.key == pygame.K_DOWN:
-                    select_sound.play()
+                    press_sound.play()
                     current_selection = (current_selection + 1) % len(options)
 
 
@@ -140,6 +148,20 @@ def survivor_mode(player_health):
     running = True
     lasers = []
     explosions = []
+    score_flash_timer = 0  # Timer for score color change
+    ############################ Trapezoid ####################################
+    top_width = 240  # Width of the top side
+    bottom_width = 200  # Width of the bottom side
+    height = 60  # Height of the trapezoid
+    x_center = config.WIDTH // 2  # Center X position
+    y_top = 0  # Distance from the top of the bar
+    trapezoid_points = [
+        (x_center - top_width // 2, y_top),  # Top-left
+        (x_center + top_width // 2, y_top),  # Top-right
+        (x_center + bottom_width // 2, y_top + height),  # Bottom-right
+        (x_center - bottom_width // 2, y_top + height)  # Bottom-left
+    ]
+    ############################ Trapezoid ####################################
 
     while running and player_health > 0:
         falling_word_speed = current_speed
@@ -150,7 +172,7 @@ def survivor_mode(player_health):
             particle.update()
 
         # Regular falling words (at variable speed)
-        if len(falling_words) < 4 and random.randint(0, 100) < 2:
+        if len(falling_words) < 5 and random.randint(0, 100) <4:
             falling_words.append(FallingWord(falling_words, falling_word_speed))
 
         # Spawn one fast-falling word every 25 correct words
@@ -158,7 +180,7 @@ def survivor_mode(player_health):
             fast_falling_words.append(FallingWord(fast_falling_words, 3))
             last_fast_word_count = correct_word_count  # Update last spawn count
 
-        draw_text(player_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT - 150)
+        
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -171,8 +193,31 @@ def survivor_mode(player_health):
                         running = False
                 elif event.key == pygame.K_BACKSPACE:
                     player_word = player_word[:-1]  
-                elif event.key != pygame.K_SPACE:  
-                    player_word += event.unicode
+                elif event.key != pygame.K_SPACE:
+                    all_falling_words = [word.word for word in (falling_words + fast_falling_words)]
+                    
+                    if player_word == "":  # If no word is started, only allow first letters of falling words
+                        valid_first_letters = {word[0] for word in all_falling_words}  # Get all unique first letters
+                        if event.unicode in valid_first_letters:
+                            player_word += event.unicode  # Allow only valid first letters
+                        else:
+                            incorrect_sound.play()
+                    else:
+                        # Find words that match current player_word as a prefix
+                        possible_words = [word for word in all_falling_words if word.startswith(player_word)]
+                        
+                        if possible_words:  # If there are valid words
+                            next_letter_index = len(player_word)
+
+                            # Get all possible next letters
+                            valid_next_letters = {word[next_letter_index] for word in possible_words if next_letter_index < len(word)}
+
+                            if event.unicode in valid_next_letters:  # Allow only valid next letters
+                                player_word += event.unicode
+                            else:
+                                incorrect_sound.play()
+                        else:
+                            pass  # Ignore incorrect input
                     
                     correct_word = None
                     all_falling_words = falling_words + fast_falling_words
@@ -185,6 +230,7 @@ def survivor_mode(player_health):
                         word_length = len(correct_word.word)
                         player_score += word_length * 100 * score_multiplier
                         score_multiplier = min(score_multiplier + 1, max_multiplier)
+                        score_flash_timer = 30  # Flash duration
                         lasers.append((spaceship.rect.centerx, spaceship.rect.top, correct_word.rect.centerx, correct_word.rect.centery))
                         boom_sound.play()
                         explosions.append(Explosion(correct_word.rect.centerx, correct_word.rect.centery))
@@ -206,10 +252,10 @@ def survivor_mode(player_health):
 
         # Draw lasers
         for laser in lasers:
-            pygame.draw.line(screen, config.CYAN, (laser[0], laser[1]), (laser[2], laser[3]), 10)
-            pygame.draw.line(screen, config.WHITE, (laser[0], laser[1]), (laser[2], laser[3]), 4)
-            pygame.draw.circle(screen, config.CYAN,(laser[0], laser[1]), 10)
-            pygame.draw.circle(screen, config.WHITE,(laser[0], laser[1]), 6)
+            pygame.draw.line(screen, config.CYAN, (laser[0], laser[1]), (laser[2], laser[3]), 20)
+            pygame.draw.line(screen, config.WHITE, (laser[0], laser[1]), (laser[2], laser[3]), 10)
+            pygame.draw.circle(screen, config.CYAN,(laser[0], laser[1]), 20)
+            pygame.draw.circle(screen, config.WHITE,(laser[0], laser[1]), 10)
         lasers.clear()
 
         # Update and draw regular falling words
@@ -236,17 +282,47 @@ def survivor_mode(player_health):
                     falling_words.remove(word)
                 elif word in fast_falling_words:
                     fast_falling_words.remove(word)
+        if score_flash_timer > 0:
+    # Interpolate color from yellow to white
+            t = score_flash_timer / 30  # Normalize between 0 and 1
+            score_color = (
+                int(config.ORANGE[0] * t + config.WHITE[0] * (1 - t)),  # R channel
+                int(config.ORANGE[1] * t + config.WHITE[1] * (1 - t)),  # G channel
+                int(config.ORANGE[2] * t + config.WHITE[2] * (1 - t))   # B channel
+            )
+            score_flash_timer -= 1
+        else:
+            score_color = config.WHITE  # Default color
 
         # Display score and health
         pygame.draw.rect(screen, config.WHITE, (0, 0, config.WIDTH, 54)) 
         pygame.draw.rect(screen, config.DARKGREY, (0, 0, config.WIDTH, 50)) 
-        draw_text_left_aligned(f"Score {player_score:,}", font, config.WHITE, 5, 0)
+        draw_text_left_aligned(f"Score :", font, config.WHITE, 5, 0)
+        pygame.draw.polygon(screen, config.GREY, trapezoid_points)
+        # pygame.draw.polygon(screen, config.DARKGREY, trapezoid_points,10)  # Change color as needed
+        pygame.draw.lines(screen, config.WHITE, False, [  # False = not a closed shape
+            trapezoid_points[0],  # Top-left
+            trapezoid_points[3],  # Bottom-left
+            trapezoid_points[2],  # Bottom-right
+            trapezoid_points[1]   # Top-right (skipping the last connection)
+        ], 5) 
+        
+        draw_text_left_aligned(f"{player_score:,}", font, config.LIGHTYELLOW, config.WIDTH // 11, 0)
+
         draw_health(player_health, config.WIDTH - 150, 5)
+        draw_text_top(player_word, config.FONT_DIS, config.CYAN, config.WIDTH // 2, 0)
 
+
+        
         if multiplier_display_timer > 0:
-            draw_text_left_aligned(f"{score_multiplier - 1}x Streak", font, config.LIGHTYELLOW, config.WIDTH // 4.8, 0)
+            draw_text_right_aligned(f" {score_multiplier - 1}x Streak", font, score_color, (config.WIDTH // 9)*8, 0)
             multiplier_display_timer -= 1
-
+        for explosion in explosions[:]:
+            explosion.update()
+            
+            explosion.draw(screen)
+            if explosion.finished:
+                explosions.remove(explosion)
         spaceship.update()
         spaceship.draw()
 
@@ -265,4 +341,4 @@ def survivor_mode(player_health):
 
 
 
-survivor_mode(player_health)# 
+# survivor_mode(player_health)# 

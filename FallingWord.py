@@ -117,7 +117,7 @@ class FallingWord:
 
         if correct_letters > self.correct_letters_stepped_back:
             step_back_count = correct_letters - self.correct_letters_stepped_back
-            self.rect.y -= 5 * step_back_count  # Move the word back by 2 pixels for each newly correct letter
+            self.rect.y -= 10 * step_back_count  # Move the word back by 2 pixels for each newly correct letter
             self.correct_letters_stepped_back = correct_letters  # Update the count of correct letters that have been stepped back
 
         # Center the text on the meteor image
@@ -141,7 +141,7 @@ class FallingWord:
         # Draw each character in the word with appropriate color
         for i, char in enumerate(self.word):
             if i < len(player_word) and char == player_word[i]:
-                char_color = config.CYAN  # Color for correct letters
+                char_color = config.YELLOW  # Color for correct letters
             else:
                 char_color = config.WHITE  # Keep the other letters white
             char_surface = font.render(char, True, char_color)
@@ -286,7 +286,7 @@ class FallingWordAdventure:
         # Draw each character in the word with appropriate color
         for i, char in enumerate(self.word):
             if i < len(player_word) and char == player_word[i]:
-                char_color = config.CYAN  # Color for correct letters
+                char_color = config.YELLOW  # Color for correct letters
             else:
                 char_color = config.WHITE  # Keep the other letters white
             char_surface = font.render(char, True, char_color)

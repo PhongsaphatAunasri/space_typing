@@ -27,14 +27,16 @@ select_sound = pygame.mixer.Sound("sounds/select.wav")
 boom_sound = pygame.mixer.Sound("sounds/boom.wav")
 laser_sound = pygame.mixer.Sound("sounds/laser.wav")
 press_sound = pygame.mixer.Sound("sounds/press.wav")
-
-loss_hp_sound.set_volume(0.05)
-game_over_sound.set_volume(0.05)
+incorrect_sound = pygame.mixer.Sound("sounds/incorrect.wav")
+#set volume
+loss_hp_sound.set_volume(0.2)
+game_over_sound.set_volume(0.2)
 correct_sound.set_volume(0.05)
-select_sound.set_volume(0.05)
+select_sound.set_volume(0.2)  
 boom_sound.set_volume(0.05)
-laser_sound.set_volume(0.05)
-press_sound.set_volume(0.05) 
+laser_sound.set_volume(0.2)
+press_sound.set_volume(0.2) 
+incorrect_sound.set_volume(0.1)
 
 def draw_health(health, x, y):
     for i in range(health):
@@ -43,6 +45,12 @@ def draw_health(health, x, y):
 def draw_text(text, font, color, x, y):
     text_surface = font.render(text, True, color)
     text_rect = text_surface.get_rect(center=(x, y))
+    screen.blit(text_surface, text_rect)
+def draw_text_top(text, font, color, x, y):
+    text_surface = font.render(text, True, color)
+    text_rect = text_surface.get_rect()
+    text_rect.centerx = x  # Center horizontally
+    text_rect.top = y  # Position from the top
     screen.blit(text_surface, text_rect)
 def draw_text_left_aligned(text, font, color, x, y):
     text_surface = font.render(text, True, color)
@@ -78,7 +86,7 @@ def game_over_menu_a(player_score):
         draw_text("Game Over", pygame.font.Font("assets/Prototype.ttf", 100), config.WHITE, config.WIDTH // 2, config.HEIGHT // 3)
         draw_text("Total Score", pygame.font.Font("assets/Prototype.ttf", 60), config.YELLOW, config.WIDTH // 2, config.HEIGHT // 2.15)
         if time.time() - start_time >= score_display:
-            draw_text(f"{player_score}", pygame.font.Font("assets/Prototype.ttf", 60), config.YELLOW, config.WIDTH // 2, config.HEIGHT // 1.75)
+            draw_text(f"{player_score:,}", pygame.font.Font("assets/Prototype.ttf", 60), config.YELLOW, config.WIDTH // 2, config.HEIGHT // 1.75)
 
         for i, option in enumerate(options):
             button_rect = pygame.Rect(config.WIDTH // 2 - 125, config.HEIGHT - 300 + i * spacing, 250, button_height)
@@ -105,10 +113,10 @@ def game_over_menu_a(player_score):
                     elif current_selection == 1:  # Main Menu option
                         return "Main Menu"
                 elif event.key == pygame.K_UP:
-                    select_sound.play()
+                    press_sound.play()
                     current_selection = (current_selection - 1) % len(options)
                 elif event.key == pygame.K_DOWN:
-                    select_sound.play()
+                    press_sound.play()
                     current_selection = (current_selection + 1) % len(options)
 
 def adventure_mode():
@@ -139,6 +147,19 @@ def adventure_mode():
     # Effects
     explosions = []  # Stores explosion effects
     correct_word_positions = []  # Stores positions for laser lines
+    ############################ Trapezoid ####################################
+    top_width = 240  # Width of the top side
+    bottom_width = 200  # Width of the bottom side
+    height = 60  # Height of the trapezoid
+    x_center = config.WIDTH // 2  # Center X position
+    y_top = 0  # Distance from the top of the bar
+    trapezoid_points = [
+        (x_center - top_width // 2, y_top),  # Top-left
+        (x_center + top_width // 2, y_top),  # Top-right
+        (x_center + bottom_width // 2, y_top + height),  # Bottom-right
+        (x_center - bottom_width // 2, y_top + height)  # Bottom-left
+    ]
+    ##########################################################################
 
     while running:
         screen.fill(config.BLACK)
@@ -160,7 +181,30 @@ def adventure_mode():
                 elif event.key == pygame.K_BACKSPACE:
                     player_word = player_word[:-1]
                 elif event.key != pygame.K_SPACE:
-                    player_word += event.unicode
+                    all_falling_words = [word.word for word in (falling_words)]
+                    
+                    if player_word == "":  # If no word is started, only allow first letters of falling words
+                        valid_first_letters = {word[0] for word in all_falling_words}  # Get all unique first letters
+                        if event.unicode in valid_first_letters:
+                            player_word += event.unicode  # Allow only valid first letters
+                        else:
+                            incorrect_sound.play()
+                    else:
+                        # Find words that match current player_word as a prefix
+                        possible_words = [word for word in all_falling_words if word.startswith(player_word)]
+                        
+                        if possible_words:  # If there are valid words
+                            next_letter_index = len(player_word)
+
+                            # Get all possible next letters
+                            valid_next_letters = {word[next_letter_index] for word in possible_words if next_letter_index < len(word)}
+
+                            if event.unicode in valid_next_letters:  # Allow only valid next letters
+                                player_word += event.unicode
+                            else:
+                                incorrect_sound.play()
+                        else:
+                            pass  # Ignore incorrect input
 
         # Handle words falling past the deadzone
         for word in falling_words[:]:
@@ -227,7 +271,7 @@ def adventure_mode():
                     state_timer = 0
             else:
                 if len(falling_words) == 0:
-                    state = 3
+                    running = False
                     boss = Boss(x=config.WIDTH // 2.5 - 100, y=100, health=10, word_file="assets/word.csv")
                     state_timer = 0
 
@@ -254,6 +298,7 @@ def adventure_mode():
                 running = False
 
         elif state == 3:
+            state = 4
             draw_text(player_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT - 150)
 
             # Draw and update the boss
@@ -338,8 +383,20 @@ def adventure_mode():
 
         pygame.draw.rect(screen, config.WHITE, (0, 0, config.WIDTH, 54)) 
         pygame.draw.rect(screen, config.DARKGREY, (0, 0, config.WIDTH, 50)) 
-        draw_text_left_aligned(f"Score {player_score:,}", font, config.WHITE, 5, 0)
+        draw_text_left_aligned(f"Score :", font, config.WHITE, 5, 0)
+        pygame.draw.polygon(screen, config.GREY, trapezoid_points)
+        # pygame.draw.polygon(screen, config.DARKGREY, trapezoid_points,10)  # Change color as needed
+        pygame.draw.lines(screen, config.WHITE, False, [  # False = not a closed shape
+            trapezoid_points[0],  # Top-left
+            trapezoid_points[3],  # Bottom-left
+            trapezoid_points[2],  # Bottom-right
+            trapezoid_points[1]   # Top-right (skipping the last connection)
+        ], 5) 
+        
+        draw_text_left_aligned(f"{player_score:,}", font, config.LIGHTYELLOW, config.WIDTH // 11, 0)
+
         draw_health(player_health, config.WIDTH - 150, 5)
+        draw_text_top(player_word, config.FONT_DIS, config.CYAN, config.WIDTH // 2, 0)
 
         pygame.display.flip()
         clock.tick(config.FPS)
@@ -350,4 +407,4 @@ def adventure_mode():
 
 
 
-adventure_mode()
+# adventure_mode()

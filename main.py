@@ -40,16 +40,16 @@ loss_streak_sound = pygame.mixer.Sound("sounds/LossStreak.wav")
 game_over_sound = pygame.mixer.Sound("sounds/gameover.wav")
 loss_hp_sound = pygame.mixer.Sound("sounds/losshp.wav")
 hp_up_sound = pygame.mixer.Sound("sounds/hpup.wav")
+press_sound = pygame.mixer.Sound("sounds/press.wav")
 
-select_sound.set_volume(0.05)  # Adjust volume 
+
+loss_hp_sound.set_volume(0.2)
+game_over_sound.set_volume(0.2)
 correct_sound.set_volume(0.05)
-incorrect_sound.set_volume(0.05)
+select_sound.set_volume(0.2)  
 boom_sound.set_volume(0.05)
-max_streak_sound.set_volume(0.05)
-loss_streak_sound.set_volume(0.05)
-game_over_sound.set_volume(0.05)
-loss_hp_sound.set_volume(0.05)
-hp_up_sound.set_volume(0.05)
+incorrect_sound.set_volume(0.1)
+press_sound.set_volume(0.2) 
 
 # Fonts
 font = config.FONT_MAIN
@@ -574,10 +574,10 @@ def select_mode():
                     elif current_selection == 3:  # Back to Main Menu
                         return "Main Menu"
                 elif event.key == pygame.K_UP:
-                    select_sound.play()
+                    press_sound.play()
                     current_selection = (current_selection - 1) % len(mode_options)
                 elif event.key == pygame.K_DOWN:
-                    select_sound.play()
+                    press_sound.play()
                     current_selection = (current_selection + 1) % len(mode_options)
 
 def select_adventure_level():
@@ -637,16 +637,16 @@ def select_adventure_level():
                     else:
                         return current_selection + 1  # Return the selected level number
                 elif event.key == pygame.K_UP:
-                    select_sound.play()
+                    press_sound.play()
                     current_selection = (current_selection - columns) % len(levels)  # Move up in the grid
                 elif event.key == pygame.K_DOWN:
-                    select_sound.play()
+                    press_sound.play()
                     current_selection = (current_selection + columns) % len(levels)  # Move down in the grid
                 elif event.key == pygame.K_LEFT:
-                    select_sound.play()
+                    press_sound.play()
                     current_selection = (current_selection - 1) % len(levels)  # Move left in the grid
                 elif event.key == pygame.K_RIGHT:
-                    select_sound.play()
+                    press_sound.play()
                     current_selection = (current_selection + 1) % len(levels)  # Move right in the grid
 
 def game_over_menu_a(player_score):
@@ -694,10 +694,10 @@ def game_over_menu_a(player_score):
                     elif current_selection == 1:  # Main Menu option
                         return main_menu()
                 elif event.key == pygame.K_UP:
-                    select_sound.play()
+                    press_sound.play()
                     current_selection = (current_selection - 1) % len(options)
                 elif event.key == pygame.K_DOWN:
-                    select_sound.play()
+                    press_sound.play()
                     current_selection = (current_selection + 1) % len(options)                    
                  
 def level_complete_screen(level, player_score):
@@ -767,10 +767,10 @@ def main_menu():
                         pygame.quit()
                         sys.exit()
                 elif event.key == pygame.K_UP:
-                    select_sound.play()
+                    press_sound.play()
                     current_selection = (current_selection - 1) % len(menu_options)
                 elif event.key == pygame.K_DOWN:
-                    select_sound.play()
+                    press_sound.play()
                     current_selection = (current_selection + 1) % len(menu_options)
 
 

@@ -14,8 +14,8 @@ info = pygame.display.Info()
 
 press_sound = pygame.mixer.Sound("sounds/press.wav")
 incorrect_sound = pygame.mixer.Sound("sounds/incorrect.wav")
-press_sound.set_volume(0.05) 
-incorrect_sound.set_volume(0.05)
+press_sound.set_volume(0.2) 
+incorrect_sound.set_volume(0.15)
 screen = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
 
 #Load keyboard images
@@ -553,8 +553,10 @@ def lesson(screen, lesson_content, title, use_letter_spacing=True):
                 if event.key == pygame.K_ESCAPE:
                     return "Main Menu"
                 elif event.key == pygame.K_RIGHT:  # Go to the next lesson
+                    press_sound.play()
                     return "Next Lesson"
                 elif event.key == pygame.K_LEFT:  # Go to the previous lesson
+                    press_sound.play()
                     return "Previous Lesson"
                 elif is_valid_keypress(event):  # Check if the key is valid
                     if event.key == pygame.K_BACKSPACE:
