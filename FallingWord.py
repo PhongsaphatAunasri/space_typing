@@ -141,9 +141,9 @@ class FallingWord:
         # Draw each character in the word with appropriate color
         for i, char in enumerate(self.word):
             if i < len(player_word) and char == player_word[i]:
-                char_color = config.YELLOW  # Color for correct letters
+                char_color = config.CYAN  # Color for correct letters
             else:
-                char_color = config.WHITE  # Keep the other letters white
+                char_color = config.TEAL  # Keep the other letters white
             char_surface = font.render(char, True, char_color)
             char_rect = char_surface.get_rect(center=(x_offset + font.size(char)[0] / 2, y_offset))
             screen.blit(char_surface, char_rect.topleft)
@@ -200,9 +200,9 @@ class FallingWordTimeTrial:
         x_offset = self.rect.centerx - total_width / 2
         y_offset = self.rect.centery + 15
         for i, char in enumerate(self.word):
-            char_color = config.BLACK
+            char_color = config.DARKGREEN
             if i < len(player_word) and char == player_word[i]:
-                char_color = config.YELLOW
+                char_color = config.LIME
             char_surface = font.render(char, True, char_color)
             char_rect = char_surface.get_rect(center=(x_offset + font.size(char)[0] / 2, y_offset))
             screen.blit(char_surface, char_rect.topleft)
@@ -286,9 +286,9 @@ class FallingWordAdventure:
         # Draw each character in the word with appropriate color
         for i, char in enumerate(self.word):
             if i < len(player_word) and char == player_word[i]:
-                char_color = config.YELLOW  # Color for correct letters
+                char_color = config.CYAN  # Color for correct letters
             else:
-                char_color = config.WHITE  # Keep the other letters white
+                char_color = config.TEAL  # Keep the other letters white
             char_surface = font.render(char, True, char_color)
             char_rect = char_surface.get_rect(center=(x_offset + font.size(char)[0] / 2, y_offset))
             screen.blit(char_surface, char_rect.topleft)

@@ -1,10 +1,11 @@
 import pygame
 import sys
+import time
 import config
 import Particle
 from FallingWord import FallingWordTimeTrial
 from Spaceship import Spaceship
-
+from Effect import Explosion
 from pause import pause_game
 
 pygame.init()
@@ -22,12 +23,19 @@ game_over_sound = pygame.mixer.Sound("sounds/gameover.wav")
 correct_sound = pygame.mixer.Sound("sounds/correct.wav")
 select_sound = pygame.mixer.Sound("sounds/select.wav")
 incorrect_sound = pygame.mixer.Sound("sounds/incorrect.wav")
+laser_sound = pygame.mixer.Sound("sounds/laser.wav")
+press_sound = pygame.mixer.Sound("sounds/press.wav")
+boom_sound = pygame.mixer.Sound("sounds/boom.wav")
 #set volume
 loss_hp_sound.set_volume(0.05)
 game_over_sound.set_volume(0.05)
 correct_sound.set_volume(0.05)
 select_sound.set_volume(0.05)  # Adjust volume 
 incorrect_sound.set_volume(0.05)
+press_sound.set_volume(0.2) 
+incorrect_sound.set_volume(0.1)
+boom_sound.set_volume(0.05)
+laser_sound.set_volume(0.2)
 def draw_text(text, font, color, x, y, blink=False):
     text_surface = font.render(text, True, color)
     text_rect = text_surface.get_rect(center=(x, y))
@@ -36,12 +44,33 @@ def draw_text(text, font, color, x, y, blink=False):
         screen.blit(text_surface, text_rect)
     elif not blink:
         screen.blit(text_surface, text_rect)
-def game_over_menu_t(score):
+def draw_text_top(text, font, color, x, y):
+    text_surface = font.render(text, True, color)
+    text_rect = text_surface.get_rect()
+    text_rect.centerx = x  # Center horizontally
+    text_rect.top = y  # Position from the top
+    screen.blit(text_surface, text_rect)
+def draw_text_left_aligned(text, font, color, x, y):
+    text_surface = font.render(text, True, color)
+    text_rect = text_surface.get_rect(topleft=(x, y))  # Align to the left
+    screen.blit(text_surface, text_rect)
+ # Grey bar with height 50px
+ # Grey bar with height 50px
+def draw_text_right_aligned(text, font, color, x, y):
+    text_surface = font.render(text, True, color)
+    text_rect = text_surface.get_rect(topright=(x, y))  # Align to the right
+    screen.blit(text_surface, text_rect)    
+
+
+def game_over_menu_1(score):
     game_over_sound.play()
     options = ["Restart", "Main Menu"]
     current_selection = 0
     button_height = 60  # config.Height of each button
     spacing = 120  # Vertical spacing between buttons
+    
+    score_display = 1
+    start_time = time.time()
 
     while True:
         # Draw everything
@@ -50,11 +79,12 @@ def game_over_menu_t(score):
             particle.draw()
             particle.update()
 
-        draw_text("Game Over", pygame.font.Font("assets/mania.ttf", 60), config.WHITE, config.WIDTH // 2, config.HEIGHT // 3)
-        draw_text(f"Total Score : {score}", pygame.font.Font("assets/mania.ttf", 42), config.YELLOW, config.WIDTH // 2, config.HEIGHT // 2.15)
-
+        draw_text("Game Over", config.FONT_TITLE, config.WHITE, config.WIDTH // 2, config.HEIGHT // 3)
+        draw_text("Total Score", config.FONT_SEMI_LARGE, config.YELLOW, config.WIDTH // 2, config.HEIGHT // 2.15)
+        if time.time() - start_time >= score_display:
+            draw_text(f"{score:,}", config.FONT_SEMI_LARGE, config.YELLOW, config.WIDTH // 2, config.HEIGHT // 1.75)
         for i, option in enumerate(options):
-            button_rect = pygame.Rect(config.WIDTH // 2 - 100, config.HEIGHT - 400 + i * spacing, 200, button_height)
+            button_rect = pygame.Rect(config.WIDTH // 2 - 125, config.HEIGHT - 300 + i * spacing, 250, button_height)
             if i == current_selection:
                 pygame.draw.rect(screen, config.WHITE, button_rect)
                 pygame.draw.rect(screen, config.YELLOW, button_rect, 5)
@@ -62,7 +92,7 @@ def game_over_menu_t(score):
             else:
                 pygame.draw.rect(screen, config.WHITE, button_rect, 5)
                 draw_text(option, font, config.WHITE, button_rect.centerx, button_rect.centery)
-
+        
         pygame.display.flip()
         pygame.time.Clock().tick(config.FPS)
         # Event handling
@@ -74,16 +104,77 @@ def game_over_menu_t(score):
                 if event.key == pygame.K_RETURN:
                     select_sound.play()
                     if current_selection == 0:  # Restart option
-                        return time_trial_mode(score)  # Restart the game
+                        return time_attack(score)  # Restart the game
                     elif current_selection == 1:  # Main Menu option
                         return "Main Menu"
                 elif event.key == pygame.K_UP:
-                    select_sound.play()
+                    press_sound.play()
                     current_selection = (current_selection - 1) % len(options)
                 elif event.key == pygame.K_DOWN:
+                    press_sound.play()
+                    current_selection = (current_selection + 1) % len(options) 
+def game_over_menu_2(formatted_time, score, target_words):
+
+    game_over_sound.play()
+    options = ["Restart", "Main Menu"]
+    current_selection = 0
+    button_height = 60  # config.Height of each button
+    spacing = 120  # Vertical spacing between buttons
+    start_ticks = None
+    score_display = 1
+    start_time = time.time()
+    paused_time_total = 0 
+
+    while True:
+        # Draw everything
+        screen.fill(config.BLACK)  # Fill the screen with the background color
+        for particle in Particle.particles:
+            particle.draw()
+            particle.update()
+
+        draw_text("Game Over", config.FONT_TITLE, config.WHITE, config.WIDTH // 2, config.HEIGHT // 3)
+        draw_text("Time Result", config.FONT_SEMI_LARGE, config.YELLOW, config.WIDTH // 2, config.HEIGHT // 2.15)
+        if start_ticks is not None:
+            elapsed_time = (pygame.time.get_ticks() - start_ticks - paused_time_total) / 1000
+        else:
+            elapsed_time = 0  # Default value before the timer starts
+
+        if score < target_words:  # If player quits before finishing 100 words
+            draw_text("Failed", config.FONT_SEMI_LARGE, config.RED, config.WIDTH // 2, config.HEIGHT // 1.75)
+        else:
+            draw_text(f"{formatted_time}", config.FONT_SEMI_LARGE, config.YELLOW, config.WIDTH // 2, config.HEIGHT // 1.75)
+
+        for i, option in enumerate(options):
+            button_rect = pygame.Rect(config.WIDTH // 2 - 125, config.HEIGHT - 300 + i * spacing, 250, button_height)
+            if i == current_selection:
+                pygame.draw.rect(screen, config.WHITE, button_rect)
+                pygame.draw.rect(screen, config.YELLOW, button_rect, 5)
+                draw_text(option, font, config.BLACK, button_rect.centerx, button_rect.centery)
+            else:
+                pygame.draw.rect(screen, config.WHITE, button_rect, 5)
+                draw_text(option, font, config.WHITE, button_rect.centerx, button_rect.centery)
+        
+        pygame.display.flip()
+        pygame.time.Clock().tick(config.FPS)
+        # Event handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
                     select_sound.play()
+                    if current_selection == 0:  # Restart option
+                        return blitz(score)  # Restart the game
+                    elif current_selection == 1:  # Main Menu option
+                        return "Main Menu"
+                elif event.key == pygame.K_UP:
+                    press_sound.play()
+                    current_selection = (current_selection - 1) % len(options)
+                elif event.key == pygame.K_DOWN:
+                    press_sound.play()
                     current_selection = (current_selection + 1) % len(options)                  
-def time_trial_mode(score):
+def time_attack(score):
     player = Spaceship()
     falling_words = []
     player_word = ""
@@ -93,6 +184,21 @@ def time_trial_mode(score):
     paused_time_total = 0  # Track the total paused time
     word_positions = [(config.WIDTH // 2, 0)]
     generate_new_word = False  # Flag to indicate new word generation
+    lasers = []
+    explosions = []
+    ############################ Trapezoid ####################################
+    top_width = 240  # Width of the top side
+    bottom_width = 200  # Width of the bottom side
+    height = 60  # Height of the trapezoid
+    x_center = config.WIDTH // 2  # Center X position
+    y_top = 0  # Distance from the top of the bar
+    trapezoid_points = [
+        (x_center - top_width // 2, y_top),  # Top-left
+        (x_center + top_width // 2, y_top),  # Top-right
+        (x_center + bottom_width // 2, y_top + height),  # Bottom-right
+        (x_center - bottom_width // 2, y_top + height)  # Bottom-left
+    ]
+    ############################ Trapezoid ####################################
 
     for position in word_positions:
         falling_words.append(FallingWordTimeTrial(position))
@@ -117,7 +223,7 @@ def time_trial_mode(score):
             seconds = (pygame.time.get_ticks() - start_ticks - paused_time_total) / 1000
 
         # Display the player's typed word
-        draw_text(player_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT - 150)
+        # draw_text(player_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT - 150)
 
         # Update and draw falling words
         for word in falling_words:
@@ -144,31 +250,68 @@ def time_trial_mode(score):
                         paused_time_total += paused_duration
                 elif event.key == pygame.K_BACKSPACE:
                     player_word = player_word[:-1]
-                elif event.key != pygame.K_SPACE:  
-                    player_word += event.unicode
-                # else:
-                #     player_word += event.unicode
+                elif event.key != pygame.K_SPACE:
+                    all_falling_words = [word.word for word in falling_words]
+                    
+                    if player_word == "":  # If no word is started, only allow first letters of falling words
+                        valid_first_letters = {word[0] for word in all_falling_words}  # Get all unique first letters
+                        if event.unicode in valid_first_letters:
+                            player_word += event.unicode  # Allow only valid first letters
+                        else:
+                            incorrect_sound.play()
+                    else:
+                        # Find words that match current player_word as a prefix
+                        possible_words = [word for word in all_falling_words if word.startswith(player_word)]
+                        
+                        if possible_words:  # If there are valid words
+                            next_letter_index = len(player_word)
 
-        # Automatically check if the typed word is correct
-        correct_word = None
-        for word in falling_words:
-            if player_word == word.word:
-                correct_word = word
-                break
+                            # Get all possible next letters
+                            valid_next_letters = {word[next_letter_index] for word in possible_words if next_letter_index < len(word)}
 
-        if correct_word:
-            correct_sound.play()
-            missile_image = pygame.image.load("assets/missile.png")
-            player.shoot_missile(correct_word, missile_image)
-            player_word = ""
-            score += 1
-            generate_new_word = True  # Flag to generate a new word
+                            if event.unicode in valid_next_letters:  # Allow only valid next letters
+                                player_word += event.unicode
+                            else:
+                                incorrect_sound.play()
+                        else:
+                            pass  # Ignore incorrect input
+
+                    # Automatically check if the typed word is correct
+                    correct_word = None
+                    for word in falling_words:
+                        if player_word == word.word:
+                            correct_word = word
+                            break
+
+                    if correct_word:
+                        laser_sound.play()
+                        # missile_image = pygame.image.load("assets/missile.png")
+                        # player.shoot_missile(correct_word, missile_image)
+                        
+                        score += 1
+                        lasers.append((player.rect.centerx, player.rect.top, correct_word.rect.centerx, correct_word.rect.centery))
+                        boom_sound.play()
+                        explosions.append(Explosion(correct_word.rect.centerx, correct_word.rect.centery))
+                        falling_words.remove(correct_word)
+                        player_word = ""
+                        generate_new_word = True  # Flag to generate a new word
 
         # Generate a new word if flagged
         if generate_new_word:
             falling_words.append(FallingWordTimeTrial((config.WIDTH // 2, 0)))
             generate_new_word = False
-
+        for laser in lasers:
+            pygame.draw.line(screen, config.CYAN, (laser[0], laser[1]), (laser[2], laser[3]), 20)
+            pygame.draw.line(screen, config.WHITE, (laser[0], laser[1]), (laser[2], laser[3]), 10)
+            pygame.draw.circle(screen, config.CYAN,(laser[0], laser[1]), 20)
+            pygame.draw.circle(screen, config.WHITE,(laser[0], laser[1]), 10)
+        lasers.clear()
+        for explosion in explosions[:]:
+            explosion.update()
+            
+            explosion.draw(screen)
+            if explosion.finished:
+                explosions.remove(explosion)
         # Update and draw missiles
         player.update_missiles(falling_words)
         player.draw_missiles()
@@ -178,11 +321,30 @@ def time_trial_mode(score):
             word.update()
 
         # Draw score and timer
-        draw_text("Score", font, config.WHITE, 65, 30)
-        draw_text(f"{score}", font, config.WHITE, 60, 65)
+        pygame.draw.rect(screen, config.LIGHTGREY, (0, 0, config.WIDTH, 81))
+        pygame.draw.rect(screen, config.GREY, (0, 0, config.WIDTH, 77)) 
+        pygame.draw.rect(screen, config.LIGHTGREY, (0, 0, config.WIDTH, 54)) 
+
+        pygame.draw.rect(screen, config.DARKGREY, (0, 0, config.WIDTH, 50)) 
+        # draw_text_left_aligned(f"Score :", font, config.WHITE, 5, 0)
+        pygame.draw.rect(screen, config.GREY, (0, 54, config.WIDTH, 15))
         if start_ticks is not None:
             line_length = int((config.WIDTH * (game_time - seconds)) / game_time)
-            pygame.draw.rect(screen, config.YELLOW, (line_length - config.WIDTH, 0, config.WIDTH, 10))
+            pygame.draw.rect(screen, config.LIGHTYELLOW, (line_length - config.WIDTH, 58, config.WIDTH, 15))
+        pygame.draw.polygon(screen, config.GREY, trapezoid_points)
+        # pygame.draw.polygon(screen, config.DARKGREY, trapezoid_points,10)  # Change color as needed
+        
+        pygame.draw.lines(screen, config.DARKYELLOW, False, [  # False = not a closed shape
+            trapezoid_points[0],  # Top-left
+            trapezoid_points[3],  # Bottom-left
+            trapezoid_points[2],  # Bottom-right
+            trapezoid_points[1]   # Top-right (skipping the last connection)
+        ], 5) 
+        
+
+        # draw_text_left_aligned(f"{score:,}", font, config.LIGHTYELLOW, config.WIDTH // 11, 0)
+        draw_text_top(f"{score:,}", config.FONT_DIS, config.LIGHTYELLOW, config.WIDTH // 2, 0)
+        
 
         # Update and draw the player
         player.update()
@@ -198,8 +360,147 @@ def time_trial_mode(score):
         pygame.time.Clock().tick(config.FPS)
 
     # Game Over menu
-    return game_over_menu_t(score)
-  
+    return game_over_menu_1(score)
+def blitz(score):
+    correct_word = 0
+    player = Spaceship()
+    falling_words = []
+    player_word = ""
+    score = 0
+    target_words = 100 # Player must type 100 words
+    start_ticks = None  # Timer starts as None
+    paused_time_total = 0  # Track the total paused time
+    word_positions = [(config.WIDTH // 2, 0)]
+    generate_new_word = False
+    lasers = []
+    explosions = []
+    
+    
+    for position in word_positions:
+        falling_words.append(FallingWordTimeTrial(position))
+
+    running = True
+    paused = False
+
+    while running:
+        screen.fill(config.BLACK)
+
+        for particle in Particle.particles:
+            particle.update()
+            particle.draw()
+
+        if all(word.frozen for word in falling_words) and start_ticks is None:
+            start_ticks = pygame.time.get_ticks()
+
+        if start_ticks is not None:
+            elapsed_time = (pygame.time.get_ticks() - start_ticks - paused_time_total) / 1000
+        else:
+            elapsed_time = 0  # Default value before the timer starts
+
+        minutes = int(elapsed_time // 60)
+        seconds = int(elapsed_time % 60)
+        formatted_time = f"{minutes}:{seconds:02d}"
+
+        for word in falling_words:
+            word.draw(player_word)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    paused_duration = pause_game()
+                    if paused_duration == "Main Menu":
+                        running = False
+                    else:
+                        paused_time_total += paused_duration
+                elif event.key == pygame.K_BACKSPACE:
+                    player_word = player_word[:-1]
+                elif event.key != pygame.K_SPACE:
+                    all_falling_words = [word.word for word in falling_words]
+                    
+                    if player_word == "":
+                        valid_first_letters = {word[0] for word in all_falling_words}
+                        if event.unicode in valid_first_letters:
+                            player_word += event.unicode
+                        else:
+                            incorrect_sound.play()
+                    else:
+                        possible_words = [word for word in all_falling_words if word.startswith(player_word)]
+                        
+                        if possible_words:
+                            next_letter_index = len(player_word)
+                            valid_next_letters = {word[next_letter_index] for word in possible_words if next_letter_index < len(word)}
+
+                            if event.unicode in valid_next_letters:
+                                player_word += event.unicode
+                            else:
+                                incorrect_sound.play()
+
+                    correct_word = None
+                    for word in falling_words:
+                        if player_word == word.word:
+                            correct_word = word
+                            break
+
+                    if correct_word:
+                        laser_sound.play()
+                        score += 1
+                        lasers.append((player.rect.centerx, player.rect.top, correct_word.rect.centerx, correct_word.rect.centery))
+                        boom_sound.play()
+                        explosions.append(Explosion(correct_word.rect.centerx, correct_word.rect.centery))
+                        falling_words.remove(correct_word)
+                        player_word = ""
+                        generate_new_word = True
+
+        if generate_new_word:
+            falling_words.append(FallingWordTimeTrial((config.WIDTH // 2, 0)))
+            generate_new_word = False
+        
+        for laser in lasers:
+            pygame.draw.line(screen, config.CYAN, (laser[0], laser[1]), (laser[2], laser[3]), 20)
+            pygame.draw.line(screen, config.WHITE, (laser[0], laser[1]), (laser[2], laser[3]), 10)
+            pygame.draw.circle(screen, config.CYAN,(laser[0], laser[1]), 20)
+            pygame.draw.circle(screen, config.WHITE,(laser[0], laser[1]), 10)
+        lasers.clear()
+
+        for explosion in explosions[:]:
+            explosion.update()
+            explosion.draw(screen)
+            if explosion.finished:
+                explosions.remove(explosion)
+
+        player.update_missiles(falling_words)
+        player.draw_missiles()
+
+        for word in falling_words[:]:
+            word.update()
+
+        pygame.draw.rect(screen, config.DARKGREY, (0, 0, config.WIDTH, 50))
+        pygame.draw.circle(screen, config.YELLOW, (config.WIDTH , 0), 180)
+        pygame.draw.circle(screen, config.GREY, (config.WIDTH , 0), 170)
+        pygame.draw.circle(screen, config.YELLOW, (0 , 0), 180)
+        pygame.draw.circle(screen, config.GREY, (0 , 0), 170)
+        
+        remaining_words = target_words - score
+        draw_text_left_aligned(f"{remaining_words}", config.FONT_SEMI_LARGE, config.LIGHTYELLOW, 10, 20)
+        draw_text_right_aligned(f"{formatted_time}", config.FONT_SEMI_LARGE, config.LIGHTYELLOW, (config.WIDTH - 10), 20)
+
+        player.update()
+        player.draw()
+
+        if score >= target_words:
+            game_over_sound.play()
+            running = False
+
+        pygame.display.flip()
+        pygame.time.Clock().tick(config.FPS)
+
+    return game_over_menu_2(formatted_time, score, target_words)
 
 
-# time_trial_mode(score)
+
+
+
+# time_attack(score)# 
+# blitz(score)

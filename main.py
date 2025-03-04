@@ -7,7 +7,8 @@ import config
 import Particle
 from lesson import run_lessons
 from survivor import survivor_mode
-from timetrial import time_trial_mode
+from timetrial import time_attack
+from timetrial import blitz
 from adventure import adventure_mode
 # Initialize Pygame
 pygame.init()
@@ -491,7 +492,7 @@ def pause_game():
 
         # Draw pause menu options
         for i, option in enumerate(pause_options):
-            button_rect = pygame.Rect(config.WIDTH // 2 - 100, config.HEIGHT - 500 + i * spacing, 200, button_height)
+            button_rect = pygame.Rect(config.WIDTH // 2 - 125, config.HEIGHT - 300 + i * spacing, 250, button_height)
             if i == current_selection:
                 pygame.draw.rect(screen, config.WHITE, button_rect)
                 pygame.draw.rect(screen, config.YELLOW, button_rect, 5)
@@ -524,6 +525,8 @@ def pause_game():
 
 def select_mode():
     # Track the current selection
+    button_height = 60  # config.Height of each button
+    spacing = 120  # Vertical spacing between buttons
     current_selection = 0
     mode_options = ["Adventure", "Survivor", "Time Trial", "Back"]
 
@@ -541,18 +544,14 @@ def select_mode():
 
         # Draw mode options with config.grey border around the current selection
         for i, option in enumerate(mode_options):
+            button_rect = pygame.Rect(config.WIDTH // 2 - 125, config.HEIGHT - 450 + i * spacing, 250, button_height)
             if i == current_selection:
-                # Fill the selected option with white
-                pygame.draw.rect(screen, config.WHITE, (config.WIDTH // 2 - 100, config.HEIGHT // 2 + i * 100, 200, 50))
-                # Draw the border in config.grey
-                pygame.draw.rect(screen, config.YELLOW, (config.WIDTH // 2 - 100, config.HEIGHT // 2 + i * 100, 200, 50), 5)
-                # Draw the text in config.black
-                draw_text(option, font, config.BLACK, config.WIDTH // 2, config.HEIGHT // 2 + i * 100 + 25)
+                pygame.draw.rect(screen, config.WHITE, button_rect)
+                pygame.draw.rect(screen, config.YELLOW, button_rect, 5)
+                draw_text(option, font, config.BLACK, button_rect.centerx, button_rect.centery)
             else:
-                # Draw the unselected option's border in white
-                pygame.draw.rect(screen, config.WHITE, (config.WIDTH // 2 - 100, config.HEIGHT // 2 + i * 100, 200, 50), 5)
-                # Draw the text in white
-                draw_text(option, font, config.WHITE, config.WIDTH // 2, config.HEIGHT // 2 + i * 100 + 25)
+                pygame.draw.rect(screen, config.WHITE, button_rect, 5)
+                draw_text(option, font, config.WHITE, button_rect.centerx, button_rect.centery)
 
         pygame.display.flip()
 
@@ -579,7 +578,58 @@ def select_mode():
                 elif event.key == pygame.K_DOWN:
                     press_sound.play()
                     current_selection = (current_selection + 1) % len(mode_options)
+def select_time_mode():
+    # Track the current selection
+    button_height = 60  # config.Height of each button
+    spacing = 120  # Vertical spacing between buttons
+    current_selection = 0
+    mode_options = ["60 Second", "Blitz", "Back"]
 
+    while True:
+        screen.blit(background_image, (0, 0))
+        for particle in Particle.particles:
+            particle.update()
+
+        # Draw everything
+        screen.fill(config.BLACK)  # Fill the screen with the background color
+        for particle in Particle.particles:
+            particle.draw()
+
+        draw_text("Select Time Mode", config.FONT_Large, config.WHITE, config.WIDTH // 2, config.HEIGHT // 2 - 100, blink=False)
+
+        # Draw mode options with config.grey border around the current selection
+        for i, option in enumerate(mode_options):
+            button_rect = pygame.Rect(config.WIDTH // 2 - 125, config.HEIGHT - 400 + i * spacing, 250, button_height)
+            if i == current_selection:
+                pygame.draw.rect(screen, config.WHITE, button_rect)
+                pygame.draw.rect(screen, config.YELLOW, button_rect, 5)
+                draw_text(option, font, config.BLACK, button_rect.centerx, button_rect.centery)
+            else:
+                pygame.draw.rect(screen, config.WHITE, button_rect, 5)
+                draw_text(option, font, config.WHITE, button_rect.centerx, button_rect.centery)
+        pygame.display.flip()
+
+        # Event handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    select_sound.play()
+                    if current_selection == 0:  # Adventure mode
+                        # story_mode()  # Call the story_mode function
+                        return "60 Second"
+                    elif current_selection == 1:  # Survivor mode
+                        return "Blitz"
+                    elif current_selection == 2:  # Time Trial mode
+                        return "Select Mode"
+                elif event.key == pygame.K_UP:
+                    press_sound.play()
+                    current_selection = (current_selection - 1) % len(mode_options)
+                elif event.key == pygame.K_DOWN:
+                    press_sound.play()
+                    current_selection = (current_selection + 1) % len(mode_options)
 def select_adventure_level():
     current_selection = 0
     levels = [f"Level {i+1}" for i in range(10)]  # List of 10 levels
@@ -719,6 +769,8 @@ def game_completed_screen(player_score):
 # Main Menu Loop
 def main_menu():
     # Track the current selection
+    button_height = 60  # config.Height of each button
+    spacing = 100  # Vertical spacing between buttons
     current_selection = 0
     menu_options = ["Start","Lesson", "Exit"]
 
@@ -736,18 +788,14 @@ def main_menu():
         
         # Draw menu options with config.grey border around the current selection
         for i, option in enumerate(menu_options):
+            button_rect = pygame.Rect(config.WIDTH // 2 - 125, config.HEIGHT - 400 + i * spacing, 250, button_height)
             if i == current_selection:
-                # Fill the selected option with white
-                pygame.draw.rect(screen, config.WHITE, (config.WIDTH // 2 - 100, config.HEIGHT // 2 + i * 100, 200, 50))
-                # Draw the border in config.grey
-                pygame.draw.rect(screen, config.YELLOW, (config.WIDTH // 2 - 100, config.HEIGHT // 2 + i * 100, 200, 50), 5)
-                # Draw the text in config.black
-                draw_text(option, font, config.BLACK, config.WIDTH // 2, config.HEIGHT // 2 + i * 100 + 25)
+                pygame.draw.rect(screen, config.WHITE, button_rect)
+                pygame.draw.rect(screen, config.YELLOW, button_rect, 5)
+                draw_text(option, font, config.BLACK, button_rect.centerx, button_rect.centery)
             else:
-                # Draw the unselected option's border in white
-                pygame.draw.rect(screen, config.WHITE, (config.WIDTH // 2 - 100, config.HEIGHT // 2 + i * 100, 200, 50), 5)
-                # Draw the text in white
-                draw_text(option, font, config.WHITE, config.WIDTH // 2, config.HEIGHT // 2 + i * 100 + 25)
+                pygame.draw.rect(screen, config.WHITE, button_rect, 5)
+                draw_text(option, font, config.WHITE, button_rect.centerx, button_rect.centery)
 
         pygame.display.flip()
 
@@ -997,7 +1045,11 @@ while menu_option != "Exit":
     elif menu_option == "Adventure":
         menu_option = adventure_mode()
     elif menu_option == "Time Trial":
-        menu_option = time_trial_mode(score)
+        menu_option = select_time_mode()
+    elif menu_option == "60 Second":
+        menu_option = time_attack(score)
+    elif menu_option == "Blitz":
+        menu_option = blitz(score)
     elif menu_option == "Lesson":
         menu_option = run_lessons() # Pass the screen object to the lesson function
     elif menu_option == "Select Mode":
