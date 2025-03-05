@@ -1,39 +1,36 @@
 import pygame
 import csv
 import config
+
 class Boss:
     def __init__(self, x, y, health, animation_speed=200, word_file="assets/word.csv"):
-        """
-        Initializes the Boss object.
-
-        Args:
-            x (int): The x-coordinate of the boss.
-            y (int): The y-coordinate of the boss.
-            health (int): The boss's total health.
-            animation_speed (int): Time in milliseconds for each sprite frame.
-            word_file (str): Path to the CSV file containing boss words.
-        """
-        self.x = config.WIDTH // 2.4
-        self.y = y
-        self.health = health
-        self.max_health = health
-        self.boss_words = self.load_words(word_file)  # Load words from CSV
-        self.current_word_index = 0
-        # Load boss sprites
         self.sprites = [
             pygame.image.load("assets/boss/Boss-stage1-1.png"),
             pygame.image.load("assets/boss/Boss-stage1-2.png"),
             pygame.image.load("assets/boss/Boss-stage1-3.png"),
             pygame.image.load("assets/boss/Boss-stage1-4.png"),
         ]
+        
+        self.sprite_width = self.sprites[0].get_width()  # Get sprite width
+        self.sprite_height = self.sprites[0].get_height()  # Get sprite height
+
+        self.x = (config.WIDTH - self.sprite_width) // 2  # Center x properly
+        self.y = y  # Keep y as is
+
+        self.health = health
+        self.max_health = health
+        self.boss_words = self.load_words(word_file)
+        self.current_word_index = 0
+        self.current_word = None
+
         self.current_frame = 0
         self.animation_timer = 0
-        self.animation_speed = animation_speed  # Milliseconds per frame
+        self.animation_speed = animation_speed
 
-        # Health bar dimensions
         self.health_bar_width = 300
         self.health_bar_height = 20
-        self.health_bar_offset = 10  # Offset above the boss sprite
+        self.health_bar_offset = 10
+
 
     def load_words(self, word_file):
         """
@@ -115,8 +112,9 @@ class Boss:
         Returns the next word that the player needs to type for the boss.
         """
         if self.current_word_index < len(self.boss_words):
-            word = self.boss_words[self.current_word_index]
+            self.current_word = self.boss_words[self.current_word_index]  # Store the current word
             self.current_word_index += 1
-            return word
+            return self.current_word
         else:
-            return None  # No more words, boss is defeated
+            self.current_word = None  # No more words, boss is defeated
+            return None

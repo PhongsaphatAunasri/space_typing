@@ -28,6 +28,7 @@ class Explosion:
         self.animation_speed = 5  # Control animation speed
         self.counter = 0
         self.finished = False
+        
 
     def update(self):
         """Update explosion animation"""

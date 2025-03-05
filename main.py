@@ -540,7 +540,7 @@ def select_mode():
         for particle in Particle.particles:
             particle.draw()
 
-        draw_text("Select Mode", config.FONT_Large, config.WHITE, config.WIDTH // 2, config.HEIGHT // 2 - 100, blink=False)
+        draw_text("Select Mode", config.FONT_LARGE, config.WHITE, config.WIDTH // 2, config.HEIGHT // 2 - 100, blink=False)
 
         # Draw mode options with config.grey border around the current selection
         for i, option in enumerate(mode_options):
@@ -595,7 +595,7 @@ def select_time_mode():
         for particle in Particle.particles:
             particle.draw()
 
-        draw_text("Select Time Mode", config.FONT_Large, config.WHITE, config.WIDTH // 2, config.HEIGHT // 2 - 100, blink=False)
+        draw_text("Select Time Mode", config.FONT_LARGE, config.WHITE, config.WIDTH // 2, config.HEIGHT // 2 - 100, blink=False)
 
         # Draw mode options with config.grey border around the current selection
         for i, option in enumerate(mode_options):
@@ -650,7 +650,7 @@ def select_adventure_level():
         for particle in Particle.particles:
             particle.draw()
 
-        draw_text("Select Adventure Level", config.FONT_Large, config.WHITE, config.WIDTH // 2, config.HEIGHT // 2 - 200, blink=False)
+        draw_text("Select Adventure Level", config.FONT_LARGE, config.WHITE, config.WIDTH // 2, config.HEIGHT // 2 - 200, blink=False)
 
         # Draw level options in a 2x5 grid
         for i, level in enumerate(levels):
@@ -784,7 +784,7 @@ def main_menu():
         for particle in Particle.particles:
             particle.draw()
 
-        draw_text("Space Typing", config.FONT_Large, config.WHITE, config.WIDTH // 2, config.HEIGHT // 2 - 100, blink=True)
+        draw_text("Space Typing", config.FONT_LARGE, config.WHITE, config.WIDTH // 2, config.HEIGHT // 2 - 100, blink=True)
         
         # Draw menu options with config.grey border around the current selection
         for i, option in enumerate(menu_options):

@@ -82,7 +82,7 @@ def game_over_menu_1(score):
         draw_text("Game Over", config.FONT_TITLE, config.WHITE, config.WIDTH // 2, config.HEIGHT // 3)
         draw_text("Total Score", config.FONT_SEMI_LARGE, config.YELLOW, config.WIDTH // 2, config.HEIGHT // 2.15)
         if time.time() - start_time >= score_display:
-            draw_text(f"{score:,}", config.FONT_SEMI_LARGE, config.YELLOW, config.WIDTH // 2, config.HEIGHT // 1.75)
+            draw_text(f"{score:,}", config.NUM_SEMI_LARGE, config.YELLOW, config.WIDTH // 2, config.HEIGHT // 1.75)
         for i, option in enumerate(options):
             button_rect = pygame.Rect(config.WIDTH // 2 - 125, config.HEIGHT - 300 + i * spacing, 250, button_height)
             if i == current_selection:
@@ -142,7 +142,7 @@ def game_over_menu_2(formatted_time, score, target_words):
         if score < target_words:  # If player quits before finishing 100 words
             draw_text("Failed", config.FONT_SEMI_LARGE, config.RED, config.WIDTH // 2, config.HEIGHT // 1.75)
         else:
-            draw_text(f"{formatted_time}", config.FONT_SEMI_LARGE, config.YELLOW, config.WIDTH // 2, config.HEIGHT // 1.75)
+            draw_text(f"{formatted_time}", config.NUM_SEMI_LARGE, config.YELLOW, config.WIDTH // 2, config.HEIGHT // 1.75)
 
         for i, option in enumerate(options):
             button_rect = pygame.Rect(config.WIDTH // 2 - 125, config.HEIGHT - 300 + i * spacing, 250, button_height)
@@ -343,7 +343,7 @@ def time_attack(score):
         
 
         # draw_text_left_aligned(f"{score:,}", font, config.LIGHTYELLOW, config.WIDTH // 11, 0)
-        draw_text_top(f"{score:,}", config.FONT_DIS, config.LIGHTYELLOW, config.WIDTH // 2, 0)
+        draw_text_top(f"{score:,}", config.NUM_DIS, config.LIGHTYELLOW, config.WIDTH // 2,10)
         
 
         # Update and draw the player
@@ -483,8 +483,8 @@ def blitz(score):
         pygame.draw.circle(screen, config.GREY, (0 , 0), 170)
         
         remaining_words = target_words - score
-        draw_text_left_aligned(f"{remaining_words}", config.FONT_SEMI_LARGE, config.LIGHTYELLOW, 10, 20)
-        draw_text_right_aligned(f"{formatted_time}", config.FONT_SEMI_LARGE, config.LIGHTYELLOW, (config.WIDTH - 10), 20)
+        draw_text_top(f"{remaining_words}", config.NUM_SEMI_LARGE, config.LIGHTYELLOW, 70, 45)
+        draw_text_top(f"{formatted_time}", config.NUM_MAIN, config.LIGHTYELLOW, (config.WIDTH - 75), 50)
 
         player.update()
         player.draw()

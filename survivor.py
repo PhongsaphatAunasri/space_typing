@@ -94,10 +94,10 @@ def game_over_menu_s(player_score):
             particle.draw()
             particle.update()
 
-        draw_text("Game Over", pygame.font.Font("assets/Prototype.ttf", 100), config.WHITE, config.WIDTH // 2, config.HEIGHT // 3)
-        draw_text("Total Score", pygame.font.Font("assets/Prototype.ttf", 60), config.YELLOW, config.WIDTH // 2, config.HEIGHT // 2.15)
+        draw_text("Game Over", config.FONT_TITLE, config.WHITE, config.WIDTH // 2, config.HEIGHT // 3)
+        draw_text("Total Score", config.FONT_SEMI_LARGE, config.YELLOW, config.WIDTH // 2, config.HEIGHT // 2.15)
         if time.time() - start_time >= score_display:
-            draw_text(f"{player_score:,}", pygame.font.Font("assets/Prototype.ttf", 60), config.YELLOW, config.WIDTH // 2, config.HEIGHT // 1.75)
+            draw_text(f"{player_score:,}", config.NUM_MAIN, config.YELLOW, config.WIDTH // 2, config.HEIGHT // 1.75)
         
         for i, option in enumerate(options):
             button_rect = pygame.Rect(config.WIDTH // 2 - 125, config.HEIGHT - 300 + i * spacing, 250, button_height)
@@ -307,7 +307,7 @@ def survivor_mode(player_health):
             trapezoid_points[1]   # Top-right (skipping the last connection)
         ], 5) 
         
-        draw_text_left_aligned(f"{player_score:,}", font, config.LIGHTYELLOW, config.WIDTH // 11, 0)
+        draw_text_left_aligned(f"{player_score:,}", config.SCORE, config.LIGHTYELLOW, config.WIDTH // 11, -10)
 
         draw_health(player_health, config.WIDTH - 150, 5)
         draw_text_top(player_word, config.FONT_DIS, config.CYAN, config.WIDTH // 2, 0)
@@ -315,8 +315,9 @@ def survivor_mode(player_health):
 
         
         if multiplier_display_timer > 0:
-            draw_text_right_aligned(f" {score_multiplier - 1}x Streak", font, score_color, (config.WIDTH // 9)*8, 0)
-            multiplier_display_timer -= 1
+            draw_text_right_aligned(f" {score_multiplier - 1}", config.SCORE, score_color, ((config.WIDTH //12)*9-22), -10)
+            draw_text_right_aligned("x Streak", config.FONT_MAIN, score_color, ((config.WIDTH // 6)*5), 0)
+            multiplier_display_timer = 0
         for explosion in explosions[:]:
             explosion.update()
             
@@ -341,4 +342,4 @@ def survivor_mode(player_health):
 
 
 
-# survivor_mode(player_health)# 
+survivor_mode(player_health)# 

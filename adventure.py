@@ -14,7 +14,7 @@ pygame.init()
 screen = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
 font = config.FONT_MAIN
 font2 = config.FONT_SEMI_LARGE
-font3 = config.FONT_Large
+font3 = config.FONT_LARGE
 # Load resources
 heart_image = pygame.image.load("assets/heart.png")
 missile_image = pygame.image.load("assets/missile.png")
@@ -86,7 +86,7 @@ def game_over_menu_a(player_score):
         draw_text("Game Over", pygame.font.Font("assets/Prototype.ttf", 100), config.WHITE, config.WIDTH // 2, config.HEIGHT // 3)
         draw_text("Total Score", pygame.font.Font("assets/Prototype.ttf", 60), config.YELLOW, config.WIDTH // 2, config.HEIGHT // 2.15)
         if time.time() - start_time >= score_display:
-            draw_text(f"{player_score:,}", pygame.font.Font("assets/Prototype.ttf", 60), config.YELLOW, config.WIDTH // 2, config.HEIGHT // 1.75)
+            draw_text(f"{player_score:,}", config.NUM_MAIN, config.YELLOW, config.WIDTH // 2, config.HEIGHT // 1.75)
 
         for i, option in enumerate(options):
             button_rect = pygame.Rect(config.WIDTH // 2 - 125, config.HEIGHT - 300 + i * spacing, 250, button_height)
@@ -139,10 +139,16 @@ def adventure_mode():
     wave_count = 0  
     max_wave_count = 3  
     waves_completed = 0  
-
+    boss_word_timer = 0
     bonus_timer = 10 * 1000  # 40 seconds for State 4
     running = True
     last_time = pygame.time.get_ticks()
+    
+    bar_width = 200  # Full width of the bar
+    bar_height = 20  # Bar height
+    bar_x = config.WIDTH // 2 - bar_width // 2  # Center the bar
+    bar_y = config.HEIGHT // 2 + 40  # Position below the word
+
 
     # Effects
     explosions = []  # Stores explosion effects
@@ -178,11 +184,42 @@ def adventure_mode():
                 if event.key == pygame.K_ESCAPE:
                     if pause_game() == "Main Menu":
                         running = False
+                elif event.type == pygame.KEYDOWN and state == 3:
+                    if event.key == pygame.K_BACKSPACE:
+                        player_word = player_word[:-1]
+                    elif player_word == "":  # If no word is started, only allow first letter of the boss word
+                        if event.unicode == boss.current_word[0]:  # Check first letter
+                            player_word += event.unicode  # Allow only valid first letter
+                        else:
+                            incorrect_sound.play()
+                    else:
+                        # Ensure we have a word to compare with
+                        if boss.current_word.startswith(player_word):  
+                            next_letter_index = len(player_word)
+                            
+                            if next_letter_index < len(boss.current_word):  # Prevent index out of range
+                                next_letter = boss.current_word[next_letter_index]
+                                if event.unicode == next_letter:  # Allow only valid next letter
+                                    player_word += event.unicode
+                                else:
+                                    incorrect_sound.play()
+                        else:
+                            incorrect_sound.play()
+
+                        
+                        
+                elif event.type == pygame.KEYDOWN and state == 4:
+                    if event.key == pygame.K_BACKSPACE:
+                        player_word = player_word[:-1]
+                    elif event.unicode.isalpha():
+                        player_word += event.unicode  # Add valid letters only
+                
+                
                 elif event.key == pygame.K_BACKSPACE:
                     player_word = player_word[:-1]
                 elif event.key != pygame.K_SPACE:
                     all_falling_words = [word.word for word in (falling_words)]
-                    
+                        
                     if player_word == "":  # If no word is started, only allow first letters of falling words
                         valid_first_letters = {word[0] for word in all_falling_words}  # Get all unique first letters
                         if event.unicode in valid_first_letters:
@@ -192,11 +229,11 @@ def adventure_mode():
                     else:
                         # Find words that match current player_word as a prefix
                         possible_words = [word for word in all_falling_words if word.startswith(player_word)]
-                        
+                            
                         if possible_words:  # If there are valid words
                             next_letter_index = len(player_word)
 
-                            # Get all possible next letters
+                                # Get all possible next letters
                             valid_next_letters = {word[next_letter_index] for word in possible_words if next_letter_index < len(word)}
 
                             if event.unicode in valid_next_letters:  # Allow only valid next letters
@@ -221,9 +258,10 @@ def adventure_mode():
         # Draw player health
         draw_health(player_health, 20, 20)
 
-        # Handle game states
+        #---------------------------- state 1 -----------------------------#
         if state == 1:
-            draw_text(player_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT - 150)
+            
+            # draw_text(player_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT - 150)
 
             # Spawn words
             if len(falling_words) == 0 or (state_timer > 2000 and len(falling_words) < 3):
@@ -234,7 +272,7 @@ def adventure_mode():
             for word in falling_words[:]:
                 if player_word == word.word:
                     laser_sound.play()
-                    player_score += len(word.word) * 1000
+                    player_score += len(word.word) * 100
                     spaceship.shoot_missile(word, missile_image)
                     remembered_words.append(word.word)
                     boom_sound.play()
@@ -250,7 +288,7 @@ def adventure_mode():
                 word.update(player_health)
                 word.draw(player_word)
 
-            if correct_word_count >= 3:
+            if correct_word_count >= 2:
                 state = 2
                 falling_words = []
                 state_timer = 0
@@ -259,8 +297,9 @@ def adventure_mode():
                 game_over_sound.play()
                 running = False
 
+        #---------------------------- state 2 -----------------------------#
         elif state == 2:
-            draw_text(player_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT - 150)
+            # draw_text(player_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT - 150)
 
             if waves_completed < max_wave_count:
                 if state_timer < 3000 and len(falling_words) < 3:
@@ -271,8 +310,8 @@ def adventure_mode():
                     state_timer = 0
             else:
                 if len(falling_words) == 0:
-                    running = False
-                    boss = Boss(x=config.WIDTH // 2.5 - 100, y=100, health=10, word_file="assets/word.csv")
+                    state = 3
+                    boss = Boss(x=config.WIDTH // 2 , y=config.HEIGHT // 4 , health=10, word_file="assets/word.csv")
                     state_timer = 0
 
             for word in falling_words[:]:
@@ -297,9 +336,10 @@ def adventure_mode():
                 game_over_sound.play()
                 running = False
 
+        #---------------------------- state 3 -----------------------------#
         elif state == 3:
-            state = 4
-            draw_text(player_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT - 150)
+            # state = 4
+            # draw_text(player_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT - 150)
 
             # Draw and update the boss
             boss.draw(screen)
@@ -310,15 +350,36 @@ def adventure_mode():
                 boss.current_word = boss.get_next_word()
 
             if boss.current_word:
-                draw_text(boss.current_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT // 2)
+                draw_text(boss.current_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT //2 - 70)
+                
+                if boss_word_timer == 0:  # Start the timer when a new word appears
+                    boss_word_timer = pygame.time.get_ticks()
 
-            # Player input check
+                elapsed_time = pygame.time.get_ticks() - boss_word_timer
+                remaining_time = max(0, 3000 - elapsed_time)  # Ensure it doesn't go negative
+
+                # Calculate bar width based on remaining time
+                current_bar_width = int((remaining_time / 3000) * bar_width)
+
+                # Draw background bar (empty part)
+                pygame.draw.rect(screen, config.DARKGREY, (bar_x, bar_y, bar_width, bar_height))
+
+                # Draw progress bar (time left)
+                pygame.draw.rect(screen, config.RED, (bar_x, bar_y, current_bar_width, bar_height))
+
+                # If 3 seconds pass and word is not typed, decrease health
+                if elapsed_time > 3000:
+                    player_health -= 1
+                    boss.current_word = boss.get_next_word()  # Get a new word
+                    boss_word_timer = pygame.time.get_ticks()  # Reset timer
+
             if player_word.strip() == boss.current_word:
                 correct_sound.play()
                 boss.take_damage(1)  
                 player_score += 2000  
                 player_word = ""  
-                boss.current_word = boss.get_next_word()
+                boss.current_word = boss.get_next_word()  # Get new word
+                boss_word_timer = pygame.time.get_ticks()  # Reset timer
 
                 # Add explosion effect at boss position
                 # explosions.append(Explosion(boss.rect.centerx, boss.rect.centery))
@@ -330,7 +391,7 @@ def adventure_mode():
 
             if player_health <= 0:
                 running = False
-
+        #---------------------------- state 4 -----------------------------#
         elif state == 4:
             draw_text("Bonus Round!", font2, config.YELLOW, config.WIDTH // 2, 200)
             draw_text("Type the previously memorized words!", font2, config.YELLOW, config.WIDTH // 2, 280)
@@ -359,13 +420,13 @@ def adventure_mode():
         for start_pos, end_pos in correct_word_positions:
             # Outer yellow line (thickness 2)
             adjusted_start = (start_pos[0], start_pos[1] - 40)
-            pygame.draw.line(screen, config.CYAN, adjusted_start, end_pos, 10)  
+            pygame.draw.line(screen, config.CYAN, adjusted_start, end_pos, 20)  
 
             # Middle white line (thickness 4)
-            pygame.draw.line(screen, config.WHITE, adjusted_start, end_pos, 4)  
+            pygame.draw.line(screen, config.WHITE, adjusted_start, end_pos, 10)  
             
-            pygame.draw.circle(screen, config.CYAN, adjusted_start, 10)
-            pygame.draw.circle(screen, config.WHITE, adjusted_start, 6)
+            pygame.draw.circle(screen, config.CYAN, adjusted_start, 20)
+            pygame.draw.circle(screen, config.WHITE, adjusted_start, 10)
         # Clear laser effects after a short duration
         correct_word_positions.clear()
 
@@ -393,11 +454,11 @@ def adventure_mode():
             trapezoid_points[1]   # Top-right (skipping the last connection)
         ], 5) 
         
-        draw_text_left_aligned(f"{player_score:,}", font, config.LIGHTYELLOW, config.WIDTH // 11, 0)
+        draw_text_left_aligned(f"{player_score:,}", config.SCORE, config.LIGHTYELLOW, config.WIDTH // 11, -10)
 
         draw_health(player_health, config.WIDTH - 150, 5)
         draw_text_top(player_word, config.FONT_DIS, config.CYAN, config.WIDTH // 2, 0)
-
+        
         pygame.display.flip()
         clock.tick(config.FPS)
 
@@ -407,4 +468,4 @@ def adventure_mode():
 
 
 
-# adventure_mode()
+adventure_mode()
