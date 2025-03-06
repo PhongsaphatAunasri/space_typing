@@ -242,6 +242,7 @@ def time_attack(score):
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
+                press_sound.play()
                 if event.key == pygame.K_ESCAPE:
                     paused_duration = pause_game()
                     if paused_duration == "Main Menu":
@@ -408,6 +409,7 @@ def blitz(score):
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
+                press_sound.play()
                 if event.key == pygame.K_ESCAPE:
                     paused_duration = pause_game()
                     if paused_duration == "Main Menu":

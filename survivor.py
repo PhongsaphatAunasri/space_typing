@@ -177,7 +177,7 @@ def survivor_mode(player_health):
 
         # Spawn one fast-falling word every 25 correct words
         if correct_word_count >= last_fast_word_count + 10:
-            fast_falling_words.append(FallingWord(fast_falling_words, 3))
+            fast_falling_words.append(FallingWord(fast_falling_words, 4))
             last_fast_word_count = correct_word_count  # Update last spawn count
 
         
@@ -278,6 +278,8 @@ def survivor_mode(player_health):
                 player_health -= 1
                 loss_hp_sound.play()
                 score_multiplier = 2  
+                if player_word and word.word.startswith(player_word):
+                    player_word = ""
                 if word in falling_words:
                     falling_words.remove(word)
                 elif word in fast_falling_words:
@@ -342,4 +344,4 @@ def survivor_mode(player_health):
 
 
 
-survivor_mode(player_health)# 
+# survivor_mode(player_health)# 

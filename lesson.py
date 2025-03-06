@@ -469,8 +469,8 @@ def show_error_summary(screen, error_count, correct_count, lesson_title):
             particle.draw()
 
         # Display static messages
-        draw_text("Congratulations", config.FONT_Large, config.WHITE, config.WIDTH // 2, config.HEIGHT // 5.5)
-        draw_text("You've completed", config.FONT_Large, config.WHITE, config.WIDTH // 2, config.HEIGHT // 3.5)
+        draw_text("Congratulations", config.FONT_LARGE, config.WHITE, config.WIDTH // 2, config.HEIGHT // 5.5)
+        draw_text("You've completed", config.FONT_LARGE, config.WHITE, config.WIDTH // 2, config.HEIGHT // 3.5)
         draw_text(f"{lesson_title}", config.FONT, config.GREEN, config.WIDTH // 2, config.HEIGHT // 2.5)
         draw_text(f"Total Errors : ", config.FONT, config.WHITE, (config.WIDTH // 2) - 130, config.HEIGHT // 2)
         draw_text(f"Accuracy : ", config.FONT, config.WHITE, (config.WIDTH // 2) - 100, config.HEIGHT // 1.7)

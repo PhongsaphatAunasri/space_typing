@@ -37,10 +37,10 @@ boom_sound.set_volume(0.05)
 laser_sound.set_volume(0.2)
 press_sound.set_volume(0.2) 
 incorrect_sound.set_volume(0.1)
-
+player_health = 3
 def draw_health(health, x, y):
     for i in range(health):
-        screen.blit(heart_image, (x + i * (heart_image.get_width() + 10), y))
+        screen.blit(heart_image, (x + (player_health - 1 - i) * (heart_image.get_width() + 10), y))
 
 def draw_text(text, font, color, x, y):
     text_surface = font.render(text, True, color)
@@ -62,7 +62,11 @@ def draw_text_right_aligned(text, font, color, x, y):
     text_surface = font.render(text, True, color)
     text_rect = text_surface.get_rect(topright=(x, y))  # Align to the right
     screen.blit(text_surface, text_rect)
-
+def is_overlapping(new_rect, existing_rects, min_distance=50):
+    for rect in existing_rects:
+        if new_rect.colliderect(rect.inflate(min_distance, min_distance)):
+            return True
+    return False
 def game_over_menu_a(player_score):
     clock = pygame.time.Clock()
     running = True
@@ -152,6 +156,7 @@ def adventure_mode():
 
     # Effects
     explosions = []  # Stores explosion effects
+
     correct_word_positions = []  # Stores positions for laser lines
     ############################ Trapezoid ####################################
     top_width = 240  # Width of the top side
@@ -250,6 +255,11 @@ def adventure_mode():
                 loss_hp_sound.play()
                 falling_words.remove(word)
 
+                # Clear player's input if it matches the removed word
+                if player_word and word.word.startswith(player_word):
+                    player_word = ""
+
+
         # Calculate delta_time
         current_time = pygame.time.get_ticks()
         delta_time = current_time - last_time
@@ -260,9 +270,21 @@ def adventure_mode():
 
         #---------------------------- state 1 -----------------------------#
         if state == 1:
-            
+            pygame.draw.rect(screen, config.WHITE, (0, 0, config.WIDTH, 54)) 
+            pygame.draw.rect(screen, config.DARKGREY, (0, 0, config.WIDTH, 50)) 
+            draw_text_left_aligned(f"Score :", font, config.WHITE, 5, 0)
+            pygame.draw.polygon(screen, config.GREY, trapezoid_points)
+            # pygame.draw.polygon(screen, config.DARKGREY, trapezoid_points,10)  # Change color as needed
+            pygame.draw.lines(screen, config.WHITE, False, [  # False = not a closed shape
+                trapezoid_points[0],  # Top-left
+                trapezoid_points[3],  # Bottom-left
+                trapezoid_points[2],  # Bottom-right
+                trapezoid_points[1]   # Top-right (skipping the last connection)
+            ], 5) 
+            spaceship.update()
+            spaceship.draw()
             # draw_text(player_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT - 150)
-
+            # state = 3
             # Spawn words
             if len(falling_words) == 0 or (state_timer > 2000 and len(falling_words) < 3):
                 falling_words.append(FallingWordAdventure(existing_words=[], speed=1 + random.random()))
@@ -296,11 +318,23 @@ def adventure_mode():
             if player_health <= 0:
                 game_over_sound.play()
                 running = False
-
+            pygame.draw.rect(screen, config.WHITE, (0, 0, config.WIDTH, 54)) 
+            pygame.draw.rect(screen, config.DARKGREY, (0, 0, config.WIDTH, 50)) 
+            draw_text_left_aligned(f"Score :", font, config.WHITE, 5, 0)
+            pygame.draw.polygon(screen, config.GREY, trapezoid_points)
+            # pygame.draw.polygon(screen, config.DARKGREY, trapezoid_points,10)  # Change color as needed
+            pygame.draw.lines(screen, config.WHITE, False, [  # False = not a closed shape
+                trapezoid_points[0],  # Top-left
+                trapezoid_points[3],  # Bottom-left
+                trapezoid_points[2],  # Bottom-right
+                trapezoid_points[1]   # Top-right (skipping the last connection)
+            ], 5) 
         #---------------------------- state 2 -----------------------------#
         elif state == 2:
+            
             # draw_text(player_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT - 150)
-
+            spaceship.update()
+            spaceship.draw()
             if waves_completed < max_wave_count:
                 if state_timer < 3000 and len(falling_words) < 3:
                     for _ in range(3):
@@ -335,31 +369,58 @@ def adventure_mode():
             if player_health <= 0:
                 game_over_sound.play()
                 running = False
-
+            pygame.draw.rect(screen, config.WHITE, (0, 0, config.WIDTH, 54)) 
+            pygame.draw.rect(screen, config.DARKGREY, (0, 0, config.WIDTH, 50)) 
+            draw_text_left_aligned(f"Score :", font, config.WHITE, 5, 0)
+            pygame.draw.polygon(screen, config.GREY, trapezoid_points)
+            # pygame.draw.polygon(screen, config.DARKGREY, trapezoid_points,10)  # Change color as needed
+            pygame.draw.lines(screen, config.WHITE, False, [  # False = not a closed shape
+                trapezoid_points[0],  # Top-left
+                trapezoid_points[3],  # Bottom-left
+                trapezoid_points[2],  # Bottom-right
+                trapezoid_points[1]   # Top-right (skipping the last connection)
+            ], 5) 
         #---------------------------- state 3 -----------------------------#
         elif state == 3:
+            
             # state = 4
             # draw_text(player_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT - 150)
-
+            spaceship.update()
+            spaceship.draw()
             # Draw and update the boss
             boss.draw(screen)
             boss.update(delta_time)
-
+            
             # Boss word handling
             if not hasattr(boss, "current_word") or boss.current_word is None:
                 boss.current_word = boss.get_next_word()
 
             if boss.current_word:
-                draw_text(boss.current_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT //2 - 70)
+                correct_part = player_word  # The part typed correctly
+                remaining_part = boss.current_word[len(player_word):]  # The remaining part of the word
+
+                # Render both parts
+                correct_surface = font.render(correct_part, True, config.LIME)
+                remaining_surface = font.render(remaining_part, True, config.WHITE)
+
+                # Combine the total word width for centering
+                total_width = correct_surface.get_width() + remaining_surface.get_width()
+                text_x = (config.WIDTH - total_width) // 2  # Center the combined text
+
+                text_y = config.HEIGHT // 2 - 90 # Keep Y position unchanged
+
+                # Draw both parts with correct positioning
+                screen.blit(correct_surface, (text_x, text_y))  # Draw correct part
+                screen.blit(remaining_surface, (text_x + correct_surface.get_width(), text_y))  # Draw remaining part
                 
                 if boss_word_timer == 0:  # Start the timer when a new word appears
                     boss_word_timer = pygame.time.get_ticks()
 
                 elapsed_time = pygame.time.get_ticks() - boss_word_timer
-                remaining_time = max(0, 3000 - elapsed_time)  # Ensure it doesn't go negative
+                remaining_time = max(0, 2000 - elapsed_time)  # Ensure it doesn't go negative
 
                 # Calculate bar width based on remaining time
-                current_bar_width = int((remaining_time / 3000) * bar_width)
+                current_bar_width = int((remaining_time / 2000) * bar_width)
 
                 # Draw background bar (empty part)
                 pygame.draw.rect(screen, config.DARKGREY, (bar_x, bar_y, bar_width, bar_height))
@@ -368,16 +429,25 @@ def adventure_mode():
                 pygame.draw.rect(screen, config.RED, (bar_x, bar_y, current_bar_width, bar_height))
 
                 # If 3 seconds pass and word is not typed, decrease health
-                if elapsed_time > 3000:
+                if elapsed_time > 2000:
+                    # spaceship.update()
+                    # spaceship.draw()
+                    loss_hp_sound.play()
                     player_health -= 1
+                    explosions.append(Explosion(spaceship.rect.centerx, config.HEIGHT-50))
+                    player_word = ""
                     boss.current_word = boss.get_next_word()  # Get a new word
                     boss_word_timer = pygame.time.get_ticks()  # Reset timer
 
             if player_word.strip() == boss.current_word:
-                correct_sound.play()
                 boss.take_damage(1)  
                 player_score += 2000  
                 player_word = ""  
+                laser_sound.play()
+                explosions.append(Explosion(config.WIDTH // 2, word.rect.centery))
+
+                # Store correct word position for laser effect
+                correct_word_positions.append((spaceship.rect.center, (config.WIDTH // 2, text_y)))
                 boss.current_word = boss.get_next_word()  # Get new word
                 boss_word_timer = pygame.time.get_ticks()  # Reset timer
 
@@ -386,25 +456,38 @@ def adventure_mode():
 
             # Check if boss is defeated
             if boss.is_defeated():
+                boom_sound.play()
                 state = 4  
                 state_timer = 0
 
             if player_health <= 0:
                 running = False
+            pygame.draw.rect(screen, config.WHITE, (0, 0, config.WIDTH, 54)) 
+            pygame.draw.rect(screen, config.DARKGREY, (0, 0, config.WIDTH, 50)) 
+            draw_text_left_aligned(f"Score :", font, config.WHITE, 5, 0)
+            pygame.draw.polygon(screen, config.GREY, trapezoid_points)
+            # pygame.draw.polygon(screen, config.DARKGREY, trapezoid_points,10)  # Change color as needed
+            pygame.draw.lines(screen, config.WHITE, False, [  # False = not a closed shape
+                trapezoid_points[0],  # Top-left
+                trapezoid_points[3],  # Bottom-left
+                trapezoid_points[2],  # Bottom-right
+                trapezoid_points[1]   # Top-right (skipping the last connection)
+            ], 5) 
         #---------------------------- state 4 -----------------------------#
-        elif state == 4:
-            draw_text("Bonus Round!", font2, config.YELLOW, config.WIDTH // 2, 200)
-            draw_text("Type the previously memorized words!", font2, config.YELLOW, config.WIDTH // 2, 280)
+        elif state == 4 and 'word_positions' not in locals():
+            
+            spaceship.update()
+            spaceship.draw()
+            
             
             draw_text(player_word, font3, config.CYAN, config.WIDTH // 2, config.HEIGHT - 400)
 
             remaining_time = max(0, bonus_timer // 1000)
-            draw_text(f"Time Left: {remaining_time}", font, config.RED, config.WIDTH - 150, 100)
+            
 
             if player_word in remembered_words:
                 correct_sound.play()
                 player_score += len(player_word) * 2000
-                spaceship.shoot_missile(FallingWordAdventure(existing_words=[], speed=1 + random.random()), missile_image)
                 remembered_words.remove(player_word)
                 player_word = ""
 
@@ -415,7 +498,21 @@ def adventure_mode():
 
             if bonus_timer <= 0:
                 running = False
-
+            pygame.draw.rect(screen, config.WHITE, (0, 0, config.WIDTH, 54)) 
+            pygame.draw.rect(screen, config.DARKGREY, (0, 0, config.WIDTH, 50)) 
+            draw_text_left_aligned(f"Score :", font, config.WHITE, 5, 0)
+            pygame.draw.polygon(screen, config.GREY, trapezoid_points)
+            # pygame.draw.polygon(screen, config.DARKGREY, trapezoid_points,10)  # Change color as needed
+            pygame.draw.lines(screen, config.WHITE, False, [  # False = not a closed shape
+                trapezoid_points[0],  # Top-left
+                trapezoid_points[3],  # Bottom-left
+                trapezoid_points[2],  # Bottom-right
+                trapezoid_points[1]   # Top-right (skipping the last connection)
+            ], 5) 
+            draw_text_right_aligned(f"Time Left: {remaining_time}", font, config.RED,  ((config.WIDTH // 6)*5), 0)
+        
+        
+        
         # Draw laser lines
         for start_pos, end_pos in correct_word_positions:
             # Outer yellow line (thickness 2)
@@ -429,6 +526,8 @@ def adventure_mode():
             pygame.draw.circle(screen, config.WHITE, adjusted_start, 10)
         # Clear laser effects after a short duration
         correct_word_positions.clear()
+        
+        
 
         # Update explosions
         for explosion in explosions[:]:
@@ -437,22 +536,6 @@ def adventure_mode():
             explosion.draw(screen)
             if explosion.finished:
                 explosions.remove(explosion)
-
-        # Update and draw spaceship
-        spaceship.update()
-        spaceship.draw()
-
-        pygame.draw.rect(screen, config.WHITE, (0, 0, config.WIDTH, 54)) 
-        pygame.draw.rect(screen, config.DARKGREY, (0, 0, config.WIDTH, 50)) 
-        draw_text_left_aligned(f"Score :", font, config.WHITE, 5, 0)
-        pygame.draw.polygon(screen, config.GREY, trapezoid_points)
-        # pygame.draw.polygon(screen, config.DARKGREY, trapezoid_points,10)  # Change color as needed
-        pygame.draw.lines(screen, config.WHITE, False, [  # False = not a closed shape
-            trapezoid_points[0],  # Top-left
-            trapezoid_points[3],  # Bottom-left
-            trapezoid_points[2],  # Bottom-right
-            trapezoid_points[1]   # Top-right (skipping the last connection)
-        ], 5) 
         
         draw_text_left_aligned(f"{player_score:,}", config.SCORE, config.LIGHTYELLOW, config.WIDTH // 11, -10)
 
@@ -464,7 +547,8 @@ def adventure_mode():
 
     return game_over_menu_a(player_score)
 
-
+# draw_text("Bonus Round!", font2, config.YELLOW, config.WIDTH // 2, 200)
+# draw_text("Type the previously memorized words!", font2, config.YELLOW, config.WIDTH // 2, 280)
 
 
 
