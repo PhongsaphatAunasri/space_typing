@@ -18,6 +18,7 @@ font3 = config.FONT_LARGE
 # Load resources
 heart_image = pygame.image.load("assets/heart.png")
 missile_image = pygame.image.load("assets/missile.png")
+bonus_box = pygame.image.load("assets/bonus-box-big.png")
 
 # Sound effects
 loss_hp_sound = pygame.mixer.Sound("sounds/losshp.wav")
@@ -144,7 +145,7 @@ def adventure_mode():
     max_wave_count = 3  
     waves_completed = 0  
     boss_word_timer = 0
-    bonus_timer = 10 * 1000  # 40 seconds for State 4
+    bonus_timer = 60 * 1000  # 40 seconds for State 4
     running = True
     last_time = pygame.time.get_ticks()
     
@@ -216,9 +217,30 @@ def adventure_mode():
                 elif event.type == pygame.KEYDOWN and state == 4:
                     if event.key == pygame.K_BACKSPACE:
                         player_word = player_word[:-1]
-                    elif event.unicode.isalpha():
-                        player_word += event.unicode  # Add valid letters only
-                
+                    elif event.key != pygame.K_SPACE:
+                        all_falling_words = random_words
+                                        
+                        if player_word == "":  # If no word is started, only allow first letters of falling words
+                            valid_first_letters = {word[0] for word in all_falling_words}  # Get all unique first letters
+                            if event.unicode in valid_first_letters:
+                                player_word += event.unicode  # Allow only valid first letters
+                            else:
+                                incorrect_sound.play()
+                        else:
+                            # Find words that match current player_word as a prefix
+                            possible_words = [word for word in all_falling_words if word.startswith(player_word)]
+                                        
+                            if possible_words:  # If there are valid words
+                                next_letter_index = len(player_word)  # Get the index for the next letter to type
+                                valid_next_letters = {word[next_letter_index] for word in possible_words if next_letter_index < len(word)}
+
+                                if event.unicode in valid_next_letters:  # Allow only valid next letters
+                                    player_word += event.unicode
+                                else:
+                                    incorrect_sound.play()
+                            else:
+                                pass  # Ignore incorrect input
+                            
                 
                 elif event.key == pygame.K_BACKSPACE:
                     player_word = player_word[:-1]
@@ -270,6 +292,7 @@ def adventure_mode():
 
         #---------------------------- state 1 -----------------------------#
         if state == 1:
+            
             pygame.draw.rect(screen, config.WHITE, (0, 0, config.WIDTH, 54)) 
             pygame.draw.rect(screen, config.DARKGREY, (0, 0, config.WIDTH, 50)) 
             draw_text_left_aligned(f"Score :", font, config.WHITE, 5, 0)
@@ -329,6 +352,7 @@ def adventure_mode():
                 trapezoid_points[2],  # Bottom-right
                 trapezoid_points[1]   # Top-right (skipping the last connection)
             ], 5) 
+            draw_text_top(player_word, config.FONT_DIS, config.CYAN, config.WIDTH // 2, 0)
         #---------------------------- state 2 -----------------------------#
         elif state == 2:
             
@@ -344,7 +368,7 @@ def adventure_mode():
                     state_timer = 0
             else:
                 if len(falling_words) == 0:
-                    state = 3
+                    state = 4
                     boss = Boss(x=config.WIDTH // 2 , y=config.HEIGHT // 4 , health=10, word_file="assets/word.csv")
                     state_timer = 0
 
@@ -380,6 +404,8 @@ def adventure_mode():
                 trapezoid_points[2],  # Bottom-right
                 trapezoid_points[1]   # Top-right (skipping the last connection)
             ], 5) 
+            
+            draw_text_top(player_word, config.FONT_DIS, config.CYAN, config.WIDTH // 2, 0)
         #---------------------------- state 3 -----------------------------#
         elif state == 3:
             
@@ -473,28 +499,85 @@ def adventure_mode():
                 trapezoid_points[2],  # Bottom-right
                 trapezoid_points[1]   # Top-right (skipping the last connection)
             ], 5) 
+            draw_text_top(player_word, config.FONT_DIS, config.CYAN, config.WIDTH // 2, 0)
         #---------------------------- state 4 -----------------------------#
-        elif state == 4 and 'word_positions' not in locals():
-            
+        elif state == 4:
             spaceship.update()
             spaceship.draw()
-            
-            
-            draw_text(player_word, font3, config.CYAN, config.WIDTH // 2, config.HEIGHT - 400)
+            # Initialize words and positions (Only once)
+            if 'word_positions' not in locals():
+                word_positions = []  # Stores positions of words
+                random_words = random.sample(remembered_words, min(len(remembered_words), 15))  # Pick up to 15 words
+                
+                for word in random_words:
+                    max_attempts = 100  # Avoid infinite loops
+                    while max_attempts > 0:
+                        x_pos = random.randint(100, config.WIDTH - 200)  # Adjust for word width
+                        y_pos = random.randint(100, config.HEIGHT - 200)
 
+                        # Check if new position overlaps with existing words
+                        collision = False
+                        for existing_word, ex, ey in word_positions:
+                            distance = ((x_pos - ex) ** 2 + (y_pos - ey) ** 2) ** 0.5
+                            if distance < 100:  # Adjust distance to prevent overlapping
+                                collision = True
+                                break
+                        
+                        if not collision:  # If no overlap, accept the position
+                            word_positions.append((word, x_pos, y_pos))
+                            break
+                        
+                        max_attempts -= 1  # Retry with a new position
+            for word, x_pos, y_pos in word_positions:
+                screen.blit(bonus_box, (x_pos - 96, y_pos - 96))  # Draw box
+
+                # Compare typed letters
+                typed_word = player_word  # Assume `player_input` holds the player's current input
+                correct_length = min(len(typed_word), len(word))  # Prevent out-of-bounds errors
+
+                # Split the word into correctly typed (red) and remaining (white)
+                correct_part = word[:correct_length] if word[:correct_length] == typed_word else ""
+                remaining_part = word[len(correct_part):]
+
+                # Render text with colors
+                correct_surface = font.render(correct_part, True, config.YELLOW)  # Red for correct letters
+                remaining_surface = font.render(remaining_part, True, config.WHITE)  # Yellow for remaining letters
+                
+                # Position text
+                total_width = correct_surface.get_width() + remaining_surface.get_width()
+
+                # Calculate the center for the full text (both correct and remaining)
+                start_x = x_pos - 96 + 96 - total_width // 2  # Center the text in the bonus box
+                correct_rect = correct_surface.get_rect(topleft=(start_x, y_pos-28  ))
+                remaining_rect = remaining_surface.get_rect(topleft=(correct_rect.right, y_pos-28  ))
+
+                # Draw text
+                screen.blit(correct_surface, correct_rect)
+                screen.blit(remaining_surface, remaining_rect)
+
+                
+            # Draw countdown timer
             remaining_time = max(0, bonus_timer // 1000)
-            
+            # draw_text_top(player_word, config.FONT_DIS, config.CYAN, config.WIDTH // 2, 0)
+            draw_text_top(f"{remaining_time}", config.FONT_DIS, config.YELLOW, config.WIDTH // 2, 0)
 
-            if player_word in remembered_words:
+            # Draw words at their positions
+            # for word, x, y in word_positions:
+            #     draw_text(word, font, config.WHITE, x, y)
+
+            # Check player input
+            if player_word in [w[0] for w in word_positions]:  # If player typed a correct word
                 correct_sound.play()
                 player_score += len(player_word) * 2000
-                remembered_words.remove(player_word)
+                word_positions = [(w, x, y) for w, x, y in word_positions if w != player_word]  # Remove typed word
                 player_word = ""
 
-            if remembered_words:
-                draw_text("Remembered Words: " + ", ".join(remembered_words), font, config.WHITE, config.WIDTH // 2, config.HEIGHT - 100)
+            # End game when all words are typed or time runs out
+            if not word_positions or bonus_timer <= 0:
+                running = False
 
             bonus_timer -= delta_time
+
 
             if bonus_timer <= 0:
                 running = False
@@ -509,9 +592,9 @@ def adventure_mode():
                 trapezoid_points[2],  # Bottom-right
                 trapezoid_points[1]   # Top-right (skipping the last connection)
             ], 5) 
-            draw_text_right_aligned(f"Time Left: {remaining_time}", font, config.RED,  ((config.WIDTH // 6)*5), 0)
-        
-        
+            # draw_text_right_aligned(f"Time Left: {remaining_time}", font, config.RED,  ((config.WIDTH // 6)*5), 0)
+            draw_text_top(f"{remaining_time}", config.FONT_DIS, config.YELLOW, config.WIDTH // 2, 0)
+            # draw_text_top(player_word, config.FONT_DIS, config.CYAN, config.WIDTH // 2, 0)
         
         # Draw laser lines
         for start_pos, end_pos in correct_word_positions:
@@ -540,7 +623,7 @@ def adventure_mode():
         draw_text_left_aligned(f"{player_score:,}", config.SCORE, config.LIGHTYELLOW, config.WIDTH // 11, -10)
 
         draw_health(player_health, config.WIDTH - 150, 5)
-        draw_text_top(player_word, config.FONT_DIS, config.CYAN, config.WIDTH // 2, 0)
+        
         
         pygame.display.flip()
         clock.tick(config.FPS)

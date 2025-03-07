@@ -10,6 +10,7 @@ import Particle
 # Initialize Pygame
 pygame.init()
 screen = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
+
 background_image = pygame.image.load("assets/bg.png") 
 font = config.FONT_MAIN
 def draw_text(text, font, color, x, y, blink=False):
