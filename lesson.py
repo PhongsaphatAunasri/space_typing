@@ -6,6 +6,7 @@ import math
 import config 
 import time
 import Particle
+from pause import pause_game
 # Initialize Pygame
 pygame.init()
 
@@ -551,7 +552,8 @@ def lesson(screen, lesson_content, title, use_letter_spacing=True):
                 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    return "Main Menu"
+                    if pause_game() == "Main Menu":
+                        running = False
                 elif event.key == pygame.K_RIGHT:  # Go to the next lesson
                     press_sound.play()
                     return "Next Lesson"

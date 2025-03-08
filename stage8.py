@@ -68,7 +68,7 @@ def is_overlapping(new_rect, existing_rects, min_distance=50):
         if new_rect.colliderect(rect.inflate(min_distance, min_distance)):
             return True
     return False
-def game_over_menu_a(player_score):
+def game_over_menu(player_score):
     clock = pygame.time.Clock()
     running = True
     game_over_sound.play()
@@ -114,7 +114,7 @@ def game_over_menu_a(player_score):
                 if event.key == pygame.K_RETURN:
                     select_sound.play()
                     if current_selection == 0:  # Restart option
-                        return adventure_mode()  # Restart the game with initial health
+                        return adventure_s8()  # Restart the game with initial health
                     elif current_selection == 1:  # Main Menu option
                         return "Main Menu"
                 elif event.key == pygame.K_UP:
@@ -124,7 +124,7 @@ def game_over_menu_a(player_score):
                     press_sound.play()
                     current_selection = (current_selection + 1) % len(options)
 
-def adventure_mode():
+def adventure_s8():
     player_health = 3
     player_score = 0
     clock = pygame.time.Clock()
@@ -145,7 +145,7 @@ def adventure_mode():
     max_wave_count = 3  
     waves_completed = 0  
     boss_word_timer = 0
-    bonus_timer = 60 * 1000  # 40 seconds for State 4
+    bonus_timer = 15 * 1000  # 40 seconds for State 4
     running = True
     last_time = pygame.time.get_ticks()
     
@@ -368,8 +368,8 @@ def adventure_mode():
                     state_timer = 0
             else:
                 if len(falling_words) == 0:
-                    state = 4
-                    boss = Boss(x=config.WIDTH // 2 , y=config.HEIGHT // 4 , health=10, word_file="assets/word.csv")
+                    state = 3
+                    boss = Boss(x=config.WIDTH // 2 , y=config.HEIGHT // 4 , health=boss_health, word_file="assets/word.csv")
                     state_timer = 0
 
             for word in falling_words[:]:
@@ -628,11 +628,11 @@ def adventure_mode():
         pygame.display.flip()
         clock.tick(config.FPS)
 
-    return game_over_menu_a(player_score)
+    return game_over_menu(player_score)
 
 # draw_text("Bonus Round!", font2, config.YELLOW, config.WIDTH // 2, 200)
 # draw_text("Type the previously memorized words!", font2, config.YELLOW, config.WIDTH // 2, 280)
 
 
 
-adventure_mode()
+# adventure_s1()

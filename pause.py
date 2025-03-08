@@ -10,7 +10,11 @@ import Particle
 # Initialize Pygame
 pygame.init()
 screen = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
+press_sound = pygame.mixer.Sound("sounds/press.wav")
+select_sound = pygame.mixer.Sound("sounds/select.wav")
 
+select_sound.set_volume(0.2) 
+press_sound.set_volume(0.2) 
 background_image = pygame.image.load("assets/bg.png") 
 font = config.FONT_MAIN
 def draw_text(text, font, color, x, y, blink=False):
@@ -26,7 +30,7 @@ def pause_game():
     pause_start_ticks = pygame.time.get_ticks()  # Record the time when the game is paused
     button_height = 60  # config.Height of each button
     spacing = 120  # Vertical spacing between buttons
-    pause_options = ["Resume", "Surrender"]
+    pause_options = ["Resume", "Exit"]
     current_selection = 0
 
     while True:
@@ -64,6 +68,7 @@ def pause_game():
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
+                    select_sound.play()
                     if current_selection == 0:
                         # Calculate the total paused time
                         paused_time = pygame.time.get_ticks() - pause_start_ticks
@@ -73,6 +78,8 @@ def pause_game():
                 elif event.key == pygame.K_ESCAPE:
                     return "Main Menu"  # Return to main menu
                 elif event.key == pygame.K_UP:
+                    press_sound.play()
                     current_selection = (current_selection - 1) % len(pause_options)
                 elif event.key == pygame.K_DOWN:
+                    press_sound.play()
                     current_selection = (current_selection + 1) % len(pause_options)

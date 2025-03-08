@@ -62,12 +62,14 @@ def draw_text_right_aligned(text, font, color, x, y):
     screen.blit(text_surface, text_rect)    
 
 
-def game_over_menu_1(score):
+def game_over_menu_1(score,elapsed_time):
     game_over_sound.play()
     options = ["Restart", "Main Menu"]
     current_selection = 0
     button_height = 60  # config.Height of each button
     spacing = 120  # Vertical spacing between buttons
+    start_time = time.time()  # Get the current absolute time
+    # elapsed_time = game_time - (time.time() - start_time)  # Remaining time
     
     score_display = 1
     start_time = time.time()
@@ -81,7 +83,9 @@ def game_over_menu_1(score):
 
         draw_text("Game Over", config.FONT_TITLE, config.WHITE, config.WIDTH // 2, config.HEIGHT // 3)
         draw_text("Total Score", config.FONT_SEMI_LARGE, config.YELLOW, config.WIDTH // 2, config.HEIGHT // 2.15)
-        if time.time() - start_time >= score_display:
+        if elapsed_time < 60:  # If the player quits before time runs out
+            draw_text("Failed", config.FONT_SEMI_LARGE, config.RED, config.WIDTH // 2, config.HEIGHT // 1.75)
+        else:  # If time ran out, show the score
             draw_text(f"{score:,}", config.NUM_SEMI_LARGE, config.YELLOW, config.WIDTH // 2, config.HEIGHT // 1.75)
         for i, option in enumerate(options):
             button_rect = pygame.Rect(config.WIDTH // 2 - 125, config.HEIGHT - 300 + i * spacing, 250, button_height)
@@ -361,7 +365,8 @@ def time_attack(score):
         pygame.time.Clock().tick(config.FPS)
 
     # Game Over menu
-    return game_over_menu_1(score)
+    return game_over_menu_1(score, seconds)
+
 def blitz(score):
     correct_word = 0
     player = Spaceship()
