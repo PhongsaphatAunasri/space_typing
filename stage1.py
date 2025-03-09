@@ -145,7 +145,7 @@ def adventure_s1():
     boss_health = 20  
     correct_word_count = 0  
     wave_count = 0  
-    max_wave_count = 3  
+    max_wave_count = 4  
     waves_completed = 0  
     boss_word_timer = 0
     bonus_timer = 15 * 1000  # 40 seconds for State 4
@@ -335,7 +335,7 @@ def adventure_s1():
                 word.update(player_health)
                 word.draw(player_word)
 
-            if correct_word_count >= 1:
+            if correct_word_count >= 15:
                 state = 2
                 falling_words = []
                 state_timer = 0
@@ -363,7 +363,7 @@ def adventure_s1():
             spaceship.draw()
             if waves_completed < max_wave_count:
                 if state_timer < 3000 and len(falling_words) < 1:
-                    for _ in range(3):
+                    for _ in range(5):
                         falling_words.append(Stage1(existing_words=[], speed=0.5 + random.random()))
                     wave_count += 1
                     waves_completed += 1
@@ -602,7 +602,7 @@ def adventure_s1():
                 trapezoid_points[2],  # Bottom-right
                 trapezoid_points[1]   # Top-right (skipping the last connection)
             ], 5) 
-            # draw_text_right_aligned(f"Time Left: {remaining_time}", font, config.RED,  ((config.WIDTH // 6)*5), 0)
+            draw_text_right_aligned(f"Bonus Time", font, config.WHITE,  ((config.WIDTH // 6)*5), 0)
             draw_text_top(f"{remaining_time}", config.FONT_DIS, config.YELLOW, config.WIDTH // 2, 0)
             # draw_text_top(player_word, config.FONT_DIS, config.CYAN, config.WIDTH // 2, 0)
         
