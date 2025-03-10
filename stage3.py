@@ -145,7 +145,7 @@ def adventure_s3():
     boss_health = 20  
     correct_word_count = 0  
     wave_count = 0  
-    max_wave_count = 4  
+    max_wave_count = 4
     waves_completed = 0  
     boss_word_timer = 0
     bonus_timer = 15 * 1000  # 40 seconds for State 4
@@ -428,8 +428,8 @@ def adventure_s3():
                 remaining_part = boss.current_word[len(player_word):]  # The remaining part of the word
 
                 # Render both parts
-                correct_surface = font.render(correct_part, True, config.BLACK)
-                remaining_surface = font.render(remaining_part, True, config.NAVY)
+                correct_surface = font.render(correct_part, True, config.CREAM)
+                remaining_surface = font.render(remaining_part, True, config.YELLOW)
 
                 # Combine the total word width for centering
                 total_width = correct_surface.get_width() + remaining_surface.get_width()
@@ -645,4 +645,4 @@ def adventure_s3():
 
 
 
-adventure_s3()
+# adventure_s3()

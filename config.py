@@ -26,7 +26,12 @@ MINT = (130, 196, 179)
 TEAL = (204, 255, 247)
 AZURE = (61, 187, 255)
 DARKGREEN = (22, 38, 16)
-
+BROWN  = (46, 24, 0)
+CREAM = (255, 236, 201)
+DARKPURPLE = (40, 0, 71)
+PURPLE = (151, 72, 212)
+PINK = (255, 133, 251)
+LAVENDER = (236, 182, 252)
 ############################## FONT ##################################
 FONT = pygame.font.Font("assets/Prototype.ttf", 50)
 FONT_DIS = pygame.font.Font("assets/Prototype.ttf", 45)

@@ -428,8 +428,8 @@ def adventure_s1():
                 remaining_part = boss.current_word[len(player_word):]  # The remaining part of the word
 
                 # Render both parts
-                correct_surface = font.render(correct_part, True, config.LIME)
-                remaining_surface = font.render(remaining_part, True, config.GREY)
+                correct_surface = font.render(correct_part, True, config.ORANGE)
+                remaining_surface = font.render(remaining_part, True, config.BROWN)
 
                 # Combine the total word width for centering
                 total_width = correct_surface.get_width() + remaining_surface.get_width()
@@ -645,4 +645,4 @@ def adventure_s1():
 
 
 
-adventure_s1()
+# adventure_s1()

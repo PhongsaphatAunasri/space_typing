@@ -5,7 +5,8 @@ import config
 import time
 from Spaceship import Spaceship
 from FallingWord import FallingWordAdventure
-from Boss import Boss
+from FallingWord import Stage8
+from Boss import Boss8
 from pause import pause_game
 from Effect import Explosion
 import Particle
@@ -72,7 +73,7 @@ def game_over_menu(player_score):
     clock = pygame.time.Clock()
     running = True
     game_over_sound.play()
-    options = ["Restart", "Main Menu"]
+    options = ["Restart", "Next Stage","Main Menu"]
     current_selection = 0
     button_height = 60  # config.Height of each button
     spacing = 100  # Vertical spacing between buttons
@@ -88,7 +89,7 @@ def game_over_menu(player_score):
             particle.draw()
             particle.update()
 
-        draw_text("Game Over", pygame.font.Font("assets/Prototype.ttf", 100), config.WHITE, config.WIDTH // 2, config.HEIGHT // 3)
+        draw_text("Stage 8", pygame.font.Font("assets/Prototype.ttf", 100), config.WHITE, config.WIDTH // 2, config.HEIGHT // 3)
         draw_text("Total Score", pygame.font.Font("assets/Prototype.ttf", 60), config.YELLOW, config.WIDTH // 2, config.HEIGHT // 2.15)
         if time.time() - start_time >= score_display:
             draw_text(f"{player_score:,}", config.NUM_MAIN, config.YELLOW, config.WIDTH // 2, config.HEIGHT // 1.75)
@@ -115,7 +116,9 @@ def game_over_menu(player_score):
                     select_sound.play()
                     if current_selection == 0:  # Restart option
                         return adventure_s8()  # Restart the game with initial health
-                    elif current_selection == 1:  # Main Menu option
+                    elif current_selection == 1:  
+                        return "Stage 9"
+                    elif current_selection == 2:  # Main Menu option
                         return "Main Menu"
                 elif event.key == pygame.K_UP:
                     press_sound.play()
@@ -134,15 +137,15 @@ def adventure_s8():
     # State variables
     state = 1
     state_timer = 0
-    boss = Boss(x=config.WIDTH // 2 - 100, y=100, health=100)
+    boss = Boss8(x=config.WIDTH // 2 - 100, y=100, health=100)
     falling_words = []
     remembered_words = []
 
     # Boss health and waves
-    boss_health = 10  
+    boss_health = 20  
     correct_word_count = 0  
     wave_count = 0  
-    max_wave_count = 3  
+    max_wave_count = 4 
     waves_completed = 0  
     boss_word_timer = 0
     bonus_timer = 15 * 1000  # 40 seconds for State 4
@@ -150,7 +153,7 @@ def adventure_s8():
     last_time = pygame.time.get_ticks()
     
     bar_width = 200  # Full width of the bar
-    bar_height = 20  # Bar height
+    bar_height = 5 # Bar height
     bar_x = config.WIDTH // 2 - bar_width // 2  # Center the bar
     bar_y = config.HEIGHT // 2 + 40  # Position below the word
 
@@ -295,7 +298,6 @@ def adventure_s8():
             
             pygame.draw.rect(screen, config.WHITE, (0, 0, config.WIDTH, 54)) 
             pygame.draw.rect(screen, config.DARKGREY, (0, 0, config.WIDTH, 50)) 
-            draw_text_left_aligned(f"Score :", font, config.WHITE, 5, 0)
             pygame.draw.polygon(screen, config.GREY, trapezoid_points)
             # pygame.draw.polygon(screen, config.DARKGREY, trapezoid_points,10)  # Change color as needed
             pygame.draw.lines(screen, config.WHITE, False, [  # False = not a closed shape
@@ -310,7 +312,7 @@ def adventure_s8():
             # state = 3
             # Spawn words
             if len(falling_words) == 0 or (state_timer > 2000 and len(falling_words) < 3):
-                falling_words.append(FallingWordAdventure(existing_words=[], speed=1 + random.random()))
+                falling_words.append(Stage8(existing_words=[], speed=1 + random.random()))
                 state_timer = 0
 
             # Process words
@@ -333,7 +335,7 @@ def adventure_s8():
                 word.update(player_health)
                 word.draw(player_word)
 
-            if correct_word_count >= 2:
+            if correct_word_count >= 15:
                 state = 2
                 falling_words = []
                 state_timer = 0
@@ -360,16 +362,16 @@ def adventure_s8():
             spaceship.update()
             spaceship.draw()
             if waves_completed < max_wave_count:
-                if state_timer < 3000 and len(falling_words) < 3:
+                if state_timer < 3000 and len(falling_words) < 1:
                     for _ in range(3):
-                        falling_words.append(FallingWordAdventure(existing_words=[], speed=1 + random.random()))
+                        falling_words.append(Stage8(existing_words=[], speed=0.5 + random.random()))
                     wave_count += 1
                     waves_completed += 1
                     state_timer = 0
             else:
                 if len(falling_words) == 0:
                     state = 3
-                    boss = Boss(x=config.WIDTH // 2 , y=config.HEIGHT // 4 , health=boss_health, word_file="assets/word.csv")
+                    boss = Boss8(x=config.WIDTH // 2 , y=config.HEIGHT // 4 , health=boss_health, word_file="assets/csv/boss8.csv")
                     state_timer = 0
 
             for word in falling_words[:]:
@@ -426,8 +428,8 @@ def adventure_s8():
                 remaining_part = boss.current_word[len(player_word):]  # The remaining part of the word
 
                 # Render both parts
-                correct_surface = font.render(correct_part, True, config.LIME)
-                remaining_surface = font.render(remaining_part, True, config.WHITE)
+                correct_surface = font.render(correct_part, True, config.YELLOW)
+                remaining_surface = font.render(remaining_part, True, config.DARKRED)
 
                 # Combine the total word width for centering
                 total_width = correct_surface.get_width() + remaining_surface.get_width()
@@ -443,19 +445,19 @@ def adventure_s8():
                     boss_word_timer = pygame.time.get_ticks()
 
                 elapsed_time = pygame.time.get_ticks() - boss_word_timer
-                remaining_time = max(0, 2000 - elapsed_time)  # Ensure it doesn't go negative
+                remaining_time = max(0, 5000 - elapsed_time)  # Ensure it doesn't go negative
 
                 # Calculate bar width based on remaining time
-                current_bar_width = int((remaining_time / 2000) * bar_width)
+                current_bar_width = int((remaining_time / 5000) * bar_width)
 
                 # Draw background bar (empty part)
                 pygame.draw.rect(screen, config.DARKGREY, (bar_x, bar_y, bar_width, bar_height))
 
                 # Draw progress bar (time left)
-                pygame.draw.rect(screen, config.RED, (bar_x, bar_y, current_bar_width, bar_height))
+                pygame.draw.rect(screen, config.WHITE, (bar_x, bar_y, current_bar_width, bar_height))
 
                 # If 3 seconds pass and word is not typed, decrease health
-                if elapsed_time > 2000:
+                if elapsed_time > 5000:
                     # spaceship.update()
                     # spaceship.draw()
                     loss_hp_sound.play()
@@ -470,9 +472,17 @@ def adventure_s8():
                 player_score += 2000  
                 player_word = ""  
                 laser_sound.play()
-                explosions.append(Explosion(config.WIDTH // 2, word.rect.centery))
-
-                # Store correct word position for laser effect
+                
+                # Define three possible explosion positions
+                explosion_positions = [
+                    (config.WIDTH // 2, config.HEIGHT // 2 - 150),
+                    (config.WIDTH // 2 - 70, config.HEIGHT // 2 + 20),
+                    (config.WIDTH // 2 + 70, config.HEIGHT // 2 + 20),
+                ]
+                # Choose one explosion randomly
+                random_explosion = random.choice(explosion_positions)
+                explosions.append(Explosion(*random_explosion))
+                
                 correct_word_positions.append((spaceship.rect.center, (config.WIDTH // 2, text_y)))
                 boss.current_word = boss.get_next_word()  # Get new word
                 boss_word_timer = pygame.time.get_ticks()  # Reset timer
@@ -592,7 +602,7 @@ def adventure_s8():
                 trapezoid_points[2],  # Bottom-right
                 trapezoid_points[1]   # Top-right (skipping the last connection)
             ], 5) 
-            # draw_text_right_aligned(f"Time Left: {remaining_time}", font, config.RED,  ((config.WIDTH // 6)*5), 0)
+            draw_text_right_aligned(f"Bonus Time", font, config.WHITE,  ((config.WIDTH // 6)*5), 0)
             draw_text_top(f"{remaining_time}", config.FONT_DIS, config.YELLOW, config.WIDTH // 2, 0)
             # draw_text_top(player_word, config.FONT_DIS, config.CYAN, config.WIDTH // 2, 0)
         
@@ -635,4 +645,4 @@ def adventure_s8():
 
 
 
-# adventure_s1()
+# adventure_s8()
