@@ -70,6 +70,7 @@ def is_overlapping(new_rect, existing_rects, min_distance=50):
             return True
     return False
 def game_over_menu(player_score):
+    pygame.mixer.stop()
     clock = pygame.time.Clock()
     running = True
     game_over_sound.play()
@@ -126,6 +127,8 @@ def game_over_menu(player_score):
                     current_selection = (current_selection + 1) % len(options)
 
 def adventure_s10():
+    pygame.mixer.stop()
+    config.STAGE_SONG.play(-1)
     player_health = 3
     player_score = 0
     clock = pygame.time.Clock()
@@ -309,15 +312,22 @@ def adventure_s10():
             # draw_text(player_word, font, config.WHITE, config.WIDTH // 2, config.HEIGHT - 150)
             # state = 3
             # Spawn words
+            possible_positions = [config.WIDTH // 9 * i for i in range(1, 9)]
+
             if len(falling_words) == 0 or (state_timer > 2000 and len(falling_words) < 3):
-                falling_words.append(Stage10(existing_words=[], speed=1 + random.random()))
-                state_timer = 0
+                used_positions = set(word.rect.x for word in falling_words)  # Track used positions
+                available_positions = [x for x in possible_positions if x not in used_positions]
+
+                if available_positions:  # Ensure there's at least one position left
+                    x = random.choice(available_positions)  # Pick a unique position
+                    falling_words.append(Stage10(existing_words=falling_words, speed=1 + random.random(), x=x))
+                    state_timer = 0
 
             # Process words
             for word in falling_words[:]:
-                if player_word == word.word:
+                if player_word == word.word and word.rect.y > 54:
                     laser_sound.play()
-                    player_score += len(word.word) * 100
+                    player_score += len(word.word) * 1000
                     spaceship.shoot_missile(word, missile_image)
                     remembered_words.append(word.word)
                     boom_sound.play()
@@ -361,8 +371,10 @@ def adventure_s10():
             spaceship.draw()
             if waves_completed < max_wave_count:
                 if state_timer < 3000 and len(falling_words) < 1:
-                    for _ in range(3):
-                        falling_words.append(Stage10(existing_words=[], speed=0.5 + random.random()))
+                    possible_positions = [config.WIDTH // 9 * i for i in range(1, 9)]
+                    random.shuffle(possible_positions)
+                    for i in range(min(3, len(possible_positions))):  # Ensure max 5 words, avoiding index error
+                        falling_words.append(Stage10(existing_words=[], speed=0.5 + random.random(), x = possible_positions[i]))
                     wave_count += 1
                     waves_completed += 1
                     state_timer = 0
@@ -373,7 +385,7 @@ def adventure_s10():
                     state_timer = 0
 
             for word in falling_words[:]:
-                if player_word == word.word:
+                if player_word == word.word and word.rect.y > 54:
                     laser_sound.play()
                     player_score += len(word.word) * 1000
                     spaceship.shoot_missile(word, missile_image)

@@ -328,7 +328,7 @@ class FallingWordAdventure:
 class Stage1:
     words_in_play = set()  # Static variable to keep track of current words in play
 
-    def __init__(self, existing_words, speed):
+    def __init__(self, existing_words, speed,x):
         # Generate a random word and ensure it is not already in play
         self.word = word_stage1()
         while self.word in FallingWord.words_in_play:
@@ -339,7 +339,7 @@ class Stage1:
 
         # Set up the position and speed
         self.rect = pygame.Rect(0, 0, 50, 10)  # Initial rect, position will be adjusted
-        self.rect.midtop = (random.randint(50, config.WIDTH - 50), 0)  # Adjust the range
+        self.rect.midtop = (x, 0)  # Adjust the range
 
         # Ensure the new word doesn't overlap with existing words' positions
         while any(word.rect.colliderect(self.rect) for word in existing_words):
@@ -421,7 +421,7 @@ class Stage1:
 class Stage2:
     words_in_play = set()  # Static variable to keep track of current words in play
 
-    def __init__(self, existing_words, speed):
+    def __init__(self, existing_words, speed,x):
         # Generate a random word and ensure it is not already in play
         self.word = word_stage2()
         while self.word in FallingWord.words_in_play:
@@ -432,7 +432,7 @@ class Stage2:
 
         # Set up the position and speed
         self.rect = pygame.Rect(0, 0, 50, 10)  # Initial rect, position will be adjusted
-        self.rect.midtop = (random.randint(50, config.WIDTH - 50), 0)  # Adjust the range
+        self.rect.midtop = (x, 0)  # Adjust the range
 
         # Ensure the new word doesn't overlap with existing words' positions
         while any(word.rect.colliderect(self.rect) for word in existing_words):
@@ -514,7 +514,7 @@ class Stage2:
 class Stage3:
     words_in_play = set()  # Static variable to keep track of current words in play
 
-    def __init__(self, existing_words, speed):
+    def __init__(self, existing_words, speed,x):
         # Generate a random word and ensure it is not already in play
         self.word = word_stage3()
         while self.word in FallingWord.words_in_play:
@@ -525,7 +525,7 @@ class Stage3:
 
         # Set up the position and speed
         self.rect = pygame.Rect(0, 0, 50, 10)  # Initial rect, position will be adjusted
-        self.rect.midtop = (random.randint(50, config.WIDTH - 50), 0)  # Adjust the range
+        self.rect.midtop = (x, 0)  # Adjust the range
 
         # Ensure the new word doesn't overlap with existing words' positions
         while any(word.rect.colliderect(self.rect) for word in existing_words):
@@ -607,7 +607,7 @@ class Stage3:
 class Stage4:
     words_in_play = set()  # Static variable to keep track of current words in play
 
-    def __init__(self, existing_words, speed):
+    def __init__(self, existing_words, speed,x):
         # Generate a random word and ensure it is not already in play
         self.word = word_stage4()
         while self.word in FallingWord.words_in_play:
@@ -618,7 +618,7 @@ class Stage4:
 
         # Set up the position and speed
         self.rect = pygame.Rect(0, 0, 50, 10)  # Initial rect, position will be adjusted
-        self.rect.midtop = (random.randint(50, config.WIDTH - 50), 0)  # Adjust the range
+        self.rect.midtop = (x, 0)  # Adjust the range
 
         # Ensure the new word doesn't overlap with existing words' positions
         while any(word.rect.colliderect(self.rect) for word in existing_words):
@@ -700,7 +700,7 @@ class Stage4:
 class Stage5:
     words_in_play = set()  # Static variable to keep track of current words in play
 
-    def __init__(self, existing_words, speed):
+    def __init__(self, existing_words, speed,x):
         # Generate a random word and ensure it is not already in play
         self.word = word_stage5()
         while self.word in FallingWord.words_in_play:
@@ -711,7 +711,7 @@ class Stage5:
 
         # Set up the position and speed
         self.rect = pygame.Rect(0, 0, 50, 10)  # Initial rect, position will be adjusted
-        self.rect.midtop = (random.randint(50, config.WIDTH - 50), 0)  # Adjust the range
+        self.rect.midtop = (x, 0)  # Adjust the range
 
         # Ensure the new word doesn't overlap with existing words' positions
         while any(word.rect.colliderect(self.rect) for word in existing_words):
@@ -793,7 +793,7 @@ class Stage5:
 class Stage6:
     words_in_play = set()  # Static variable to keep track of current words in play
 
-    def __init__(self, existing_words, speed):
+    def __init__(self, existing_words, speed,x):
         # Generate a random word and ensure it is not already in play
         self.word = word_stage6()
         while self.word in FallingWord.words_in_play:
@@ -804,7 +804,7 @@ class Stage6:
 
         # Set up the position and speed
         self.rect = pygame.Rect(0, 0, 50, 10)  # Initial rect, position will be adjusted
-        self.rect.midtop = (random.randint(50, config.WIDTH - 50), 0)  # Adjust the range
+        self.rect.midtop = (x, 0)  # Adjust the range
 
         # Ensure the new word doesn't overlap with existing words' positions
         while any(word.rect.colliderect(self.rect) for word in existing_words):
@@ -886,7 +886,7 @@ class Stage6:
 class Stage7:
     words_in_play = set()  # Static variable to keep track of current words in play
 
-    def __init__(self, existing_words, speed):
+    def __init__(self, existing_words, speed,x):
         # Generate a random word and ensure it is not already in play
         self.word = word_stage7()
         while self.word in FallingWord.words_in_play:
@@ -897,7 +897,7 @@ class Stage7:
 
         # Set up the position and speed
         self.rect = pygame.Rect(0, 0, 50, 10)  # Initial rect, position will be adjusted
-        self.rect.midtop = (random.randint(50, config.WIDTH - 50), 0)  # Adjust the range
+        self.rect.midtop = (x, 0)  # Adjust the range
 
         # Ensure the new word doesn't overlap with existing words' positions
         while any(word.rect.colliderect(self.rect) for word in existing_words):
@@ -979,7 +979,7 @@ class Stage7:
 class Stage8:
     words_in_play = set()  # Static variable to keep track of current words in play
 
-    def __init__(self, existing_words, speed):
+    def __init__(self, existing_words, speed,x):
         # Generate a random word and ensure it is not already in play
         self.word = word_stage8()
         while self.word in FallingWord.words_in_play:
@@ -990,7 +990,7 @@ class Stage8:
 
         # Set up the position and speed
         self.rect = pygame.Rect(0, 0, 50, 10)  # Initial rect, position will be adjusted
-        self.rect.midtop = (random.randint(50, config.WIDTH - 50), 0)  # Adjust the range
+        self.rect.midtop = (x, 0)  # Adjust the range
 
         # Ensure the new word doesn't overlap with existing words' positions
         while any(word.rect.colliderect(self.rect) for word in existing_words):
@@ -1072,7 +1072,7 @@ class Stage8:
 class Stage9:
     words_in_play = set()  # Static variable to keep track of current words in play
 
-    def __init__(self, existing_words, speed):
+    def __init__(self, existing_words, speed,x):
         # Generate a random word and ensure it is not already in play
         self.word = word_stage9()
         while self.word in FallingWord.words_in_play:
@@ -1083,7 +1083,7 @@ class Stage9:
 
         # Set up the position and speed
         self.rect = pygame.Rect(0, 0, 50, 10)  # Initial rect, position will be adjusted
-        self.rect.midtop = (random.randint(50, config.WIDTH - 50), 0)  # Adjust the range
+        self.rect.midtop = (x, 0)  # Adjust the range
 
         # Ensure the new word doesn't overlap with existing words' positions
         while any(word.rect.colliderect(self.rect) for word in existing_words):
@@ -1165,7 +1165,7 @@ class Stage9:
 class Stage10:
     words_in_play = set()  # Static variable to keep track of current words in play
 
-    def __init__(self, existing_words, speed):
+    def __init__(self, existing_words, speed,x):
         # Generate a random word and ensure it is not already in play
         self.word = word_stage10()
         while self.word in FallingWord.words_in_play:
@@ -1176,7 +1176,7 @@ class Stage10:
 
         # Set up the position and speed
         self.rect = pygame.Rect(0, 0, 50, 10)  # Initial rect, position will be adjusted
-        self.rect.midtop = (random.randint(50, config.WIDTH - 50), 0)  # Adjust the range
+        self.rect.midtop = (x, 0)  # Adjust the range
 
         # Ensure the new word doesn't overlap with existing words' positions
         while any(word.rect.colliderect(self.rect) for word in existing_words):

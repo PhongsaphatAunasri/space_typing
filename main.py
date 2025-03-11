@@ -66,10 +66,10 @@ boom_sound.set_volume(0.05)
 incorrect_sound.set_volume(0.1)
 press_sound.set_volume(0.2) 
 
+
+
 # Fonts
 font = config.FONT_MAIN
-
-
 
 
 
@@ -138,8 +138,11 @@ def select_mode():
                         # story_mode()  # Call the story_mode function
                         return "Adventure"
                     elif current_selection == 1:  # Survivor mode
+                        config.TITLE_SONG.stop()
+                        config.SURVIVOR_SONG.play(-1)
                         return "Survivor"
                     elif current_selection == 2:  # Time Trial mode
+                        
                         return "Time Trial"
                     elif current_selection == 3:  # Back to Main Menu
                         return "Main Menu"
@@ -150,6 +153,7 @@ def select_mode():
                     press_sound.play()
                     current_selection = (current_selection + 1) % len(mode_options)
 def select_time_mode():
+    
     # Track the current selection
     button_height = 60  # config.Height of each button
     spacing = 120  # Vertical spacing between buttons
@@ -190,8 +194,12 @@ def select_time_mode():
                     select_sound.play()
                     if current_selection == 0:  # Adventure mode
                         # story_mode()  # Call the story_mode function
+                        config.TITLE_SONG.stop()
+                        config.TIME_SONG.play(-1)
                         return "60 Second"
                     elif current_selection == 1:  # Survivor mode
+                        config.TITLE_SONG.stop()
+                        config.TIME_SONG.play(-1)
                         return "Blitz"
                     elif current_selection == 2:  # Time Trial mode
                         return "Select Mode"
@@ -358,13 +366,15 @@ def select_stage():
 
 # Main Menu Loop
 def main_menu():
+    pygame.mixer.stop()
+    config.TITLE_SONG.play(-1)
     # Track the current selection
     button_height = 60  # config.Height of each button
     spacing = 100  # Vertical spacing between buttons
     current_selection = 0
     menu_options = ["Start","Lesson", "Exit"]
 
-    while True:
+    while True:       
         screen.blit(background_image, (0, 0))
         for particle in Particle.particles:
             particle.update()
@@ -400,6 +410,8 @@ def main_menu():
                     if current_selection == 0:  # Select Mode option
                         return "Select Mode"
                     elif current_selection == 1:  # Lesson option
+                        pygame.mixer.stop()
+                        config.LESSON_SONG.play(-1)
                         return "Lesson"
                     elif current_selection == 2:  # Exit option
                         pygame.quit()

@@ -15,8 +15,10 @@ info = pygame.display.Info()
 
 press_sound = pygame.mixer.Sound("sounds/press.wav")
 incorrect_sound = pygame.mixer.Sound("sounds/incorrect.wav")
+select_sound = pygame.mixer.Sound("sounds/select.wav")
 press_sound.set_volume(0.2) 
 incorrect_sound.set_volume(0.15)
+select_sound.set_volume(0.2)
 screen = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
 
 #Load keyboard images
@@ -118,7 +120,6 @@ key_question = pygame.image.load("assets/keys/key-question.png")
 press_space = pygame.image.load("assets/keys/key-space-p.png")
 blank = pygame.image.load("assets/keys/blank-layout.png")
 space_key_position = (config.WIDTH/5 , config.HEIGHT - 350) 
-
 
 def load_lesson_from_csv(filename):
     with open(filename, "r") as file:
@@ -552,7 +553,9 @@ def lesson(screen, lesson_content, title, use_letter_spacing=True):
                 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
+                    select_sound.play()
                     if pause_game() == "Main Menu":
+                        config.LESSON_SONG.stop()
                         running = False
                 elif event.key == pygame.K_RIGHT:  # Go to the next lesson
                     press_sound.play()
@@ -685,7 +688,7 @@ def lesson(screen, lesson_content, title, use_letter_spacing=True):
     return "Main Menu"
 
 # Run all lessons
-def run_lessons():
+def run_lessons():  
     lessons = [
         ('Lesson 1 : Home Row ', "assets/csv/lesson1.csv"),
         ("Lesson 2 : G and H", "assets/csv/lesson2.csv"),
@@ -719,6 +722,7 @@ def run_lessons():
 
         # Handle the returned value
         if lesson_result == "Main Menu":
+            config.LESSON_SONG.stop()
             return "Main Menu"
         elif lesson_result == "Next Lesson":
             if current_index < len(lessons) - 1:

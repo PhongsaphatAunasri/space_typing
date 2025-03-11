@@ -51,3 +51,17 @@ NUM_TITLE = pygame.font.Font("assets/Robotica.ttf", 100)
 
 SCORE = pygame.font.Font("assets/Hermes-Regular.otf",55)
 SCORE_SEMI_LARGE = pygame.font.Font("assets/Hermes-Regular.otf",70)
+
+############################## SFX ##################################
+TITLE_SONG = pygame.mixer.Sound("sounds/title.mp3")
+TITLE_SONG.set_volume(0.1)
+STAGE_SONG = pygame.mixer.Sound("sounds/stage.mp3")
+STAGE_SONG.set_volume(0.1)
+LESSON_SONG = pygame.mixer.Sound("sounds/lesson.mp3")
+LESSON_SONG.set_volume(0.1)
+SURVIVOR_SONG = pygame.mixer.Sound("sounds/survivor.mp3")
+SURVIVOR_SONG.set_volume(0.1)
+TIME_SONG = pygame.mixer.Sound("sounds/time.mp3")
+TIME_SONG.set_volume(0.1)
+
+SFX = [TITLE_SONG,STAGE_SONG,LESSON_SONG,TIME_SONG,SURVIVOR_SONG]

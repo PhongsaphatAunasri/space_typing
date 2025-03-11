@@ -26,6 +26,7 @@ def draw_text(text, font, color, x, y, blink=False):
     elif not blink:
         screen.blit(text_surface, text_rect)
 def pause_game():
+    pygame.mixer.pause()
     pause_font = config.FONT
     pause_start_ticks = pygame.time.get_ticks()  # Record the time when the game is paused
     button_height = 60  # config.Height of each button
@@ -70,6 +71,7 @@ def pause_game():
                 if event.key == pygame.K_RETURN:
                     select_sound.play()
                     if current_selection == 0:
+                        pygame.mixer.unpause()
                         # Calculate the total paused time
                         paused_time = pygame.time.get_ticks() - pause_start_ticks
                         return paused_time  # Return the total paused duration

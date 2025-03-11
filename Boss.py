@@ -85,10 +85,10 @@ class Boss:
 class Boss1:
     def __init__(self, x, y, health, animation_speed=200, word_file="assets/csv/boss1.csv"):
         self.sprites = [
-            pygame.image.load("assets/boss/Boss-stage5-1.png"),
-            pygame.image.load("assets/boss/Boss-stage5-2.png"),
-            pygame.image.load("assets/boss/Boss-stage5-3.png"),
-            pygame.image.load("assets/boss/Boss-stage5-4.png"),
+            pygame.image.load("assets/boss/Boss-stage1-1.png"),
+            pygame.image.load("assets/boss/Boss-stage1-2.png"),
+            pygame.image.load("assets/boss/Boss-stage1-3.png"),
+            pygame.image.load("assets/boss/Boss-stage1-4.png"),
         ]
         
         self.sprite_width = self.sprites[0].get_width()  # Get sprite width

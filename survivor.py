@@ -75,6 +75,7 @@ def draw_text_right_aligned(text, font, color, x, y):
 
 
 def game_over_menu_s(player_score):
+    config.SURVIVOR_SONG.stop()
     clock = pygame.time.Clock()
     running = True
     game_over_sound.play()
@@ -120,8 +121,11 @@ def game_over_menu_s(player_score):
                 if event.key == pygame.K_RETURN:
                     select_sound.play()
                     if current_selection == 0:  # Restart option
+                        pygame.mixer.stop()
+                        config.SURVIVOR_SONG.play(-1)
                         return survivor_mode(player_health)  # Restart the game with initial health
                     elif current_selection == 1:  # Main Menu option
+                        
                         return "Main Menu"
                 elif event.key == pygame.K_UP:
                     press_sound.play()
@@ -190,6 +194,7 @@ def survivor_mode(player_health):
                 if event.key == pygame.K_ESCAPE:
                     result = pause_game()
                     if result == "Main Menu":
+                        config.SURVIVOR_SONG.stop()
                         running = False
                 elif event.key == pygame.K_BACKSPACE:
                     player_word = player_word[:-1]  
@@ -222,9 +227,10 @@ def survivor_mode(player_health):
                     correct_word = None
                     all_falling_words = falling_words + fast_falling_words
                     for word in all_falling_words:
-                        if player_word == word.word:
+                        if player_word == word.word and word.rect.y > 54:  # Prevent removal if y <= 100
                             correct_word = word
                             break
+
                     if correct_word:
                         laser_sound.play()
                         word_length = len(correct_word.word)

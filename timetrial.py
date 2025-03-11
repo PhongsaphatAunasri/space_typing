@@ -63,6 +63,7 @@ def draw_text_right_aligned(text, font, color, x, y):
 
 
 def game_over_menu_1(score,elapsed_time):
+    config.TIME_SONG.stop()
     game_over_sound.play()
     options = ["Restart", "Main Menu"]
     current_selection = 0
@@ -108,6 +109,8 @@ def game_over_menu_1(score,elapsed_time):
                 if event.key == pygame.K_RETURN:
                     select_sound.play()
                     if current_selection == 0:  # Restart option
+                        pygame.mixer.stop()
+                        config.TIME_SONG.play(-1)
                         return time_attack(score)  # Restart the game
                     elif current_selection == 1:  # Main Menu option
                         return "Main Menu"
@@ -118,7 +121,7 @@ def game_over_menu_1(score,elapsed_time):
                     press_sound.play()
                     current_selection = (current_selection + 1) % len(options) 
 def game_over_menu_2(formatted_time, score, target_words):
-
+    config.TIME_SONG.stop()
     game_over_sound.play()
     options = ["Restart", "Main Menu"]
     current_selection = 0
@@ -169,8 +172,11 @@ def game_over_menu_2(formatted_time, score, target_words):
                 if event.key == pygame.K_RETURN:
                     select_sound.play()
                     if current_selection == 0:  # Restart option
+                        pygame.mixer.stop()
+                        config.TIME_SONG.play(-1)
                         return blitz(score)  # Restart the game
                     elif current_selection == 1:  # Main Menu option
+                        config.TIME_SONG.stop()
                         return "Main Menu"
                 elif event.key == pygame.K_UP:
                     press_sound.play()
@@ -249,7 +255,9 @@ def time_attack(score):
                 press_sound.play()
                 if event.key == pygame.K_ESCAPE:
                     paused_duration = pause_game()
+                    
                     if paused_duration == "Main Menu":
+                        config.TIME_SONG.stop()
                         running = False
                     else:
                         paused_time_total += paused_duration
@@ -417,7 +425,9 @@ def blitz(score):
                 press_sound.play()
                 if event.key == pygame.K_ESCAPE:
                     paused_duration = pause_game()
+                    
                     if paused_duration == "Main Menu":
+                        config.TIME_SONG.stop()
                         running = False
                     else:
                         paused_time_total += paused_duration
