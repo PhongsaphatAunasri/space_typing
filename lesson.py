@@ -708,7 +708,7 @@ def run_lessons():
         ("Lesson 16 : Question Mark , Hyphen, Slash", "assets/csv/lesson16.csv"),
         ("Lesson 17 : Numeral", "assets/csv/lesson17.csv"),
         ("Lesson 18 : Symbols", "assets/csv/lesson18.csv"),
-        ("Lesson 19 : test", "assets/csv/test.csv"),
+        # ("Lesson 19 : test", "assets/csv/test.csv"),
     ]
     current_index = 0  # Start with the first lesson
 
