@@ -13,12 +13,6 @@ pygame.init()
 # Constants
 info = pygame.display.Info()
 
-press_sound = pygame.mixer.Sound("sounds/press.wav")
-incorrect_sound = pygame.mixer.Sound("sounds/incorrect.wav")
-select_sound = pygame.mixer.Sound("sounds/select.wav")
-press_sound.set_volume(0.2) 
-incorrect_sound.set_volume(0.15)
-select_sound.set_volume(0.2)
 screen = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
 
 #Load keyboard images
@@ -553,26 +547,26 @@ def lesson(screen, lesson_content, title, use_letter_spacing=True):
                 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    select_sound.play()
+                    config.SELECT.play()
                     if pause_game() == "Main Menu":
                         config.LESSON_SONG.stop()
                         running = False
                 elif event.key == pygame.K_RIGHT:  # Go to the next lesson
-                    press_sound.play()
+                    config.PRESS.play()
                     return "Next Lesson"
                 elif event.key == pygame.K_LEFT:  # Go to the previous lesson
-                    press_sound.play()
+                    config.PRESS.play()
                     return "Previous Lesson"
                 elif is_valid_keypress(event):  # Check if the key is valid
                     if event.key == pygame.K_BACKSPACE:
                         feedback = "No skipping!"
-                        incorrect_sound.play()
+                        config.INCORRECT.play()
                         error_count += 1
                     
                     elif event.unicode == current_item[typed_index]:
                         typed_index += 1
                         feedback = "Good job!"
-                        press_sound.play()
+                        config.PRESS.play()
                         correct_count += 1
                         # Clear mistakes for the current index when correctly typed
                         # mistake_indices.discard(typed_index - 1)
@@ -591,7 +585,7 @@ def lesson(screen, lesson_content, title, use_letter_spacing=True):
                         
                     elif typed_index not in mistake_indices:
                         feedback = "Try again!"
-                        incorrect_sound.play()
+                        config.INCORRECT.play()
                         error_count += 1
                         mistake_indices.add(typed_index)  # Ensure mistakes are recorded
                 elif event.key == pygame.K_SPACE:

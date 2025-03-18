@@ -52,7 +52,7 @@ NUM_TITLE = pygame.font.Font("assets/Robotica.ttf", 100)
 SCORE = pygame.font.Font("assets/Hermes-Regular.otf",55)
 SCORE_SEMI_LARGE = pygame.font.Font("assets/Hermes-Regular.otf",70)
 
-############################## SFX ##################################
+############################## BGM ##################################
 TITLE_SONG = pygame.mixer.Sound("sounds/title.mp3")
 TITLE_SONG.set_volume(0.1)
 STAGE_SONG = pygame.mixer.Sound("sounds/stage.mp3")
@@ -64,4 +64,24 @@ SURVIVOR_SONG.set_volume(0.1)
 TIME_SONG = pygame.mixer.Sound("sounds/time.mp3")
 TIME_SONG.set_volume(0.1)
 
-SFX = [TITLE_SONG,STAGE_SONG,LESSON_SONG,TIME_SONG,SURVIVOR_SONG]
+BGM = [TITLE_SONG,STAGE_SONG,LESSON_SONG,TIME_SONG,SURVIVOR_SONG]
+
+SELECT = pygame.mixer.Sound("sounds/select.wav")
+CORRECT = pygame.mixer.Sound("sounds/correct.wav")
+INCORRECT = pygame.mixer.Sound("sounds/incorrect.wav")
+BOOM = pygame.mixer.Sound("sounds/boom.wav")
+GAMEOVER = pygame.mixer.Sound("sounds/gameover.wav")
+LOSS_HP = pygame.mixer.Sound("sounds/losshp.wav")
+PRESS = pygame.mixer.Sound("sounds/press.wav")
+LASER = pygame.mixer.Sound("sounds/laser.wav")
+
+SELECT.set_volume(0.2)  
+CORRECT.set_volume(0.05)
+INCORRECT.set_volume(0.1)
+BOOM.set_volume(0.05)
+GAMEOVER.set_volume(0.2)
+LOSS_HP.set_volume(0.2)
+PRESS.set_volume(0.2) 
+LASER.set_volume(0.2)
+
+SFX = [SELECT,PRESS,LASER,BOOM,GAMEOVER,CORRECT,INCORRECT,LOSS_HP]

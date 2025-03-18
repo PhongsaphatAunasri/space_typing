@@ -2,10 +2,8 @@ import pygame
 import sys
 import random
 import csv
-# import math
 import config
 import Particle
-
 import survivor
 
 
@@ -46,27 +44,10 @@ heart_image = pygame.image.load("assets/heart.png")
 missile_image = pygame.image.load("assets/missile.png")
 # ufo_image = pygame.image.load("assets/ufo.png")
 
-select_sound = pygame.mixer.Sound("sounds/select.wav")
-correct_sound = pygame.mixer.Sound("sounds/correct.wav")
-incorrect_sound = pygame.mixer.Sound("sounds/incorrect.wav")
-boom_sound = pygame.mixer.Sound("sounds/boom.wav")
-max_streak_sound = pygame.mixer.Sound("sounds/MaxStreak.wav")
-loss_streak_sound = pygame.mixer.Sound("sounds/LossStreak.wav")
-game_over_sound = pygame.mixer.Sound("sounds/gameover.wav")
-loss_hp_sound = pygame.mixer.Sound("sounds/losshp.wav")
-hp_up_sound = pygame.mixer.Sound("sounds/hpup.wav")
-press_sound = pygame.mixer.Sound("sounds/press.wav")
 
 
-loss_hp_sound.set_volume(0.2)
-game_over_sound.set_volume(0.2)
-correct_sound.set_volume(0.05)
-select_sound.set_volume(0.2)  
-boom_sound.set_volume(0.05)
-incorrect_sound.set_volume(0.1)
-press_sound.set_volume(0.2) 
-
-
+music_volume = 0.1
+sfx_volume = 0.1
 
 # Fonts
 font = config.FONT_MAIN
@@ -133,7 +114,7 @@ def select_mode():
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    select_sound.play()
+                    config.SELECT.play()
                     if current_selection == 0:  # Adventure mode
                         # story_mode()  # Call the story_mode function
                         return "Adventure"
@@ -147,10 +128,10 @@ def select_mode():
                     elif current_selection == 3:  # Back to Main Menu
                         return "Main Menu"
                 elif event.key == pygame.K_UP:
-                    press_sound.play()
+                    config.PRESS.play()
                     current_selection = (current_selection - 1) % len(mode_options)
                 elif event.key == pygame.K_DOWN:
-                    press_sound.play()
+                    config.PRESS.play()
                     current_selection = (current_selection + 1) % len(mode_options)
 def select_time_mode():
     
@@ -191,7 +172,7 @@ def select_time_mode():
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    select_sound.play()
+                    config.SELECT.play()
                     if current_selection == 0:  # Adventure mode
                         # story_mode()  # Call the story_mode function
                         config.TITLE_SONG.stop()
@@ -204,10 +185,10 @@ def select_time_mode():
                     elif current_selection == 2:  # Time Trial mode
                         return "Select Mode"
                 elif event.key == pygame.K_UP:
-                    press_sound.play()
+                    config.PRESS.play()
                     current_selection = (current_selection - 1) % len(mode_options)
                 elif event.key == pygame.K_DOWN:
-                    press_sound.play()
+                    config.PRESS.play()
                     current_selection = (current_selection + 1) % len(mode_options)
 
 def select_stage():
@@ -272,96 +253,111 @@ def select_stage():
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    select_sound.play()
+                    config.SELECT.play()
                     if current_selection == last_index:  
                         return "Select Mode"  # ✅ Correctly exit when selecting "Back"
                     return mode_options[current_selection]  # Return the selected stage  # Return the selected stage
 
                 elif event.key == pygame.K_LEFT:
-                    press_sound.play()
+                    config.PRESS.play()
                     if current_selection > 0 and current_selection != last_index:
                         current_selection -= 1
 
                 elif event.key == pygame.K_RIGHT:
-                    press_sound.play()
+                    config.PRESS.play()
                     if current_selection < total_stages - 1:
                         current_selection += 1
 
                 elif event.key == pygame.K_UP:
-                    press_sound.play()
+                    config.PRESS.play()
                     if current_selection >= cols:  # Move up in the grid
                         current_selection -= cols
                     elif current_selection == last_index:  # Back to the grid
                         current_selection = total_stages - 1
 
                 elif event.key == pygame.K_DOWN:
-                    press_sound.play()
+                    config.PRESS.play()
                     if current_selection < total_stages - cols:  # Move down in grid
                         current_selection += cols
                     else:
                         current_selection = last_index  # Move to "Back" button
-                # elif current_selection == 0:  # Adventure mode
-                #         # story_mode()  # Call the story_mode function
-                #         return "Stage 1"
-                # elif current_selection == 1:  
-                #     return "Stage 2"
-                # elif current_selection == 2:  
-                #     return "Stage 3"
-                # elif current_selection == 3:  
-                #     return "Stage 4"
-                # elif current_selection == 4:  
-                #     return "Stage 5"
-                # elif current_selection == 5:  
-                #     return "Stage 6"
-                # elif current_selection == 6:  
-                #     return "Stage 7"
-                # elif current_selection == 7:  
-                #     return "Stage 8"
-                # elif current_selection == 8:  
-                #     return "Stage 9"
-                # elif current_selection == 9:  
-                #     return "Stage 10"
-                # elif current_selection == 10:  
-                #     return "Select Mode"
+        pygame.display.flip()
+
+def options_menu():
+    global music_volume, sfx_volume
+
+    options = ["BGM Volume", "SFX Volume", "Back"]
+    current_selection = 0
+
+    slider_x = config.WIDTH // 2 - 100  # X position for sliders
+    slider_width = 200 # Length of the slider bar
+
+    while True:
+        screen.blit(background_image, (0, 0))
+        for particle in Particle.particles:
+            particle.update()
+
+        # Draw everything
+        screen.fill(config.BLACK)  # Fill the screen with the background color
+        for particle in Particle.particles:
+            particle.draw()
+
+        draw_text("Options", config.FONT_LARGE, config.WHITE, config.WIDTH // 2, config.HEIGHT // 2 - 150)
+
+        for i, option in enumerate(options):
+            button_rect = pygame.Rect(config.WIDTH // 2 - 150, config.HEIGHT // 2 - 50 + i * 150, 300, 50)
+
+            # Highlight current selection
+            if i == current_selection and current_selection == 2:
+                pygame.draw.rect(screen, config.WHITE, button_rect)
+                pygame.draw.rect(screen, config.YELLOW, button_rect, 5)
+                draw_text(option, font, config.BLACK, button_rect.centerx, button_rect.centery)
+            elif i == current_selection:
+                pygame.draw.rect(screen, config.YELLOW, button_rect, 5)
+                draw_text(option, font, config.WHITE, button_rect.centerx, button_rect.centery)
+            elif i != current_selection:
+                draw_text(option, font, config.WHITE, button_rect.centerx, button_rect.centery)
+            else:
+                pygame.draw.rect(screen, config.WHITE, button_rect, 5)
+                draw_text(option, font, config.WHITE, button_rect.centerx, button_rect.centery)
+
+            # draw_text(option, config.FONT_MAIN, config.WHITE, button_rect.centerx, button_rect.centery)
+
+            # Draw sliders for volume settings
+            if i < 2:  # For Music & SFX Volume
+                pygame.draw.rect(screen, config.GREY, (slider_x, button_rect.centery + 50, slider_width, 20))  # Bar
+                fill_width = int(slider_width * (music_volume if i == 0 else sfx_volume))
+                pygame.draw.rect(screen, config.WHITE, (slider_x, button_rect.centery + 50, fill_width, 20))  # Fill
+
         pygame.display.flip()
 
         # Event handling
-        # for event in pygame.event.get():
-        #     if event.type == pygame.QUIT:
-        #         pygame.quit()
-        #         sys.exit()
-        #     elif event.type == pygame.KEYDOWN:
-        #         if event.key == pygame.K_RETURN:
-        #             select_sound.play()
-        #             if current_selection == 0:  # Adventure mode
-        #                 # story_mode()  # Call the story_mode function
-        #                 return "Stage 1"
-        #             elif current_selection == 1:  
-        #                 return "Stage 2"
-        #             elif current_selection == 2:  
-        #                 return "Stage 3"
-        #             elif current_selection == 3:  
-        #                 return "Stage 4"
-        #             elif current_selection == 4:  
-        #                 return "Stage 5"
-        #             elif current_selection == 5:  
-        #                 return "Stage 6"
-        #             elif current_selection == 6:  
-        #                 return "Stage 7"
-        #             elif current_selection == 7:  
-        #                 return "Stage 8"
-        #             elif current_selection == 8:  
-        #                 return "Stage 9"
-        #             elif current_selection == 9:  
-        #                 return "Stage 10"
-        #             elif current_selection == 10:  
-        #                 return "Select Mode"
-        #         elif event.key == pygame.K_UP:
-        #             press_sound.play()
-        #             current_selection = (current_selection - 1) % len(mode_options)
-        #         elif event.key == pygame.K_DOWN:
-        #             press_sound.play()
-        #             current_selection = (current_selection + 1) % len(mode_options)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                config.PRESS.play()
+                if event.key == pygame.K_RETURN:
+                    config.SELECT.play()
+                    if current_selection == 2:  # Back
+                        return "Main Menu"
+                elif event.key == pygame.K_UP:
+                    current_selection = (current_selection - 1) % len(options)
+                elif event.key == pygame.K_DOWN:
+                    current_selection = (current_selection + 1) % len(options)
+                elif event.key in [pygame.K_LEFT, pygame.K_RIGHT]:
+                    adjust = 0.05 if event.key == pygame.K_RIGHT else -0.05
+                    
+                    if current_selection == 0:
+                        music_volume = max(0.0, min(1.0, music_volume + adjust))
+                        for sound in config.BGM:
+                            sound.set_volume(music_volume)
+                    elif current_selection == 1:
+                        sfx_volume = max(0.0, min(1.0, sfx_volume + adjust))
+                        for sound in config.SFX:
+                            sound.set_volume(sfx_volume)
+
 
 
 # Main Menu Loop
@@ -372,7 +368,7 @@ def main_menu():
     button_height = 60  # config.Height of each button
     spacing = 100  # Vertical spacing between buttons
     current_selection = 0
-    menu_options = ["Start","Lesson", "Exit"]
+    menu_options = ["Start","Lesson","Option", "Exit"]
 
     while True:       
         screen.blit(background_image, (0, 0))
@@ -406,21 +402,23 @@ def main_menu():
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    select_sound.play()
+                    config.SELECT.play()
                     if current_selection == 0:  # Select Mode option
                         return "Select Mode"
                     elif current_selection == 1:  # Lesson option
                         pygame.mixer.stop()
                         config.LESSON_SONG.play(-1)
                         return "Lesson"
-                    elif current_selection == 2:  # Exit option
+                    elif current_selection == 2:  # Lesson option
+                        return "Option"
+                    elif current_selection == 3:  # Exit option
                         pygame.quit()
                         sys.exit()
                 elif event.key == pygame.K_UP:
-                    press_sound.play()
+                    config.PRESS.play()
                     current_selection = (current_selection - 1) % len(menu_options)
                 elif event.key == pygame.K_DOWN:
-                    press_sound.play()
+                    config.PRESS.play()
                     current_selection = (current_selection + 1) % len(menu_options)
 
 
@@ -462,6 +460,8 @@ while menu_option != "Exit":
         menu_option = run_lessons() # Pass the screen object to the lesson function
     elif menu_option == "Select Mode":
         menu_option = select_mode()
+    elif menu_option == "Option":
+        menu_option = options_menu()
     elif menu_option == "Main Menu":
         menu_option = main_menu()
 

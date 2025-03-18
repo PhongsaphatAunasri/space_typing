@@ -19,23 +19,7 @@ meteor_image = pygame.image.load("assets/meteor-3.png")
 
 
 
-incorrect_sound = pygame.mixer.Sound("sounds/incorrect.wav")
-boom_sound = pygame.mixer.Sound("sounds/boom.wav")
-max_streak_sound = pygame.mixer.Sound("sounds/MaxStreak.wav")
-loss_streak_sound = pygame.mixer.Sound("sounds/LossStreak.wav")
 
-
-hp_up_sound = pygame.mixer.Sound("sounds/hpup.wav")
-
-
-
-incorrect_sound.set_volume(0.05)
-
-max_streak_sound.set_volume(0.05)
-loss_streak_sound.set_volume(0.05)
-
-
-hp_up_sound.set_volume(0.05)
 font = config.FONT_MAIN
 def generate_random_word():
     return random.choice(survivor_words)

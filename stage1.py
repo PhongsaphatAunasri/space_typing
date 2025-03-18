@@ -21,25 +21,6 @@ heart_image = pygame.image.load("assets/heart.png")
 missile_image = pygame.image.load("assets/missile.png")
 bonus_box = pygame.image.load("assets/bonus-box-big.png")
 
-# Sound effects
-loss_hp_sound = pygame.mixer.Sound("sounds/losshp.wav")
-game_over_sound = pygame.mixer.Sound("sounds/gameover.wav")
-correct_sound = pygame.mixer.Sound("sounds/correct.wav")
-select_sound = pygame.mixer.Sound("sounds/select.wav")
-boom_sound = pygame.mixer.Sound("sounds/boom.wav")
-laser_sound = pygame.mixer.Sound("sounds/laser.wav")
-press_sound = pygame.mixer.Sound("sounds/press.wav")
-incorrect_sound = pygame.mixer.Sound("sounds/incorrect.wav")
-#set volume
-loss_hp_sound.set_volume(0.2)
-game_over_sound.set_volume(0.2)
-correct_sound.set_volume(0.05)
-select_sound.set_volume(0.2)  
-boom_sound.set_volume(0.05)
-laser_sound.set_volume(0.2)
-press_sound.set_volume(0.2) 
-incorrect_sound.set_volume(0.1)
-
 
 # config.STAGE_SONG.stop()
 
@@ -78,7 +59,7 @@ def game_over_menu(player_score):
     pygame.mixer.stop()
     clock = pygame.time.Clock()
     running = True
-    game_over_sound.play()
+    config.GAMEOVER.play()
     options = ["Restart", "Next Stage","Main Menu"]
     current_selection = 0
     button_height = 60  # config.Height of each button
@@ -119,7 +100,7 @@ def game_over_menu(player_score):
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    select_sound.play()
+                    config.SELECT.play()
                     if current_selection == 0:
                         # Restart option
                         return adventure_s1()  # Restart the game with initial health
@@ -128,10 +109,10 @@ def game_over_menu(player_score):
                     elif current_selection == 2:  # Main Menu option
                         return "Main Menu"
                 elif event.key == pygame.K_UP:
-                    press_sound.play()
+                    config.PRESS.play()
                     current_selection = (current_selection - 1) % len(options)
                 elif event.key == pygame.K_DOWN:
-                    press_sound.play()
+                    config.PRESS.play()
                     current_selection = (current_selection + 1) % len(options)
 
 def adventure_s1():
@@ -198,7 +179,7 @@ def adventure_s1():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
-                press_sound.play()
+                config.PRESS.play()
                 if event.key == pygame.K_ESCAPE:
                     if pause_game() == "Main Menu":
                         running = False
@@ -209,7 +190,7 @@ def adventure_s1():
                         if event.unicode == boss.current_word[0]:  # Check first letter
                             player_word += event.unicode  # Allow only valid first letter
                         else:
-                            incorrect_sound.play()
+                            config.INCORRECT.play()
                     else:
                         # Ensure we have a word to compare with
                         if boss.current_word.startswith(player_word):  
@@ -220,9 +201,9 @@ def adventure_s1():
                                 if event.unicode == next_letter:  # Allow only valid next letter
                                     player_word += event.unicode
                                 else:
-                                    incorrect_sound.play()
+                                    config.INCORRECT.play()
                         else:
-                            incorrect_sound.play()
+                            config.INCORRECT.play()
 
                         
                         
@@ -237,7 +218,7 @@ def adventure_s1():
                             if event.unicode in valid_first_letters:
                                 player_word += event.unicode  # Allow only valid first letters
                             else:
-                                incorrect_sound.play()
+                                config.INCORRECT.play()
                         else:
                             # Find words that match current player_word as a prefix
                             possible_words = [word for word in all_falling_words if word.startswith(player_word)]
@@ -249,7 +230,7 @@ def adventure_s1():
                                 if event.unicode in valid_next_letters:  # Allow only valid next letters
                                     player_word += event.unicode
                                 else:
-                                    incorrect_sound.play()
+                                    config.INCORRECT.play()
                             else:
                                 pass  # Ignore incorrect input
                             
@@ -264,7 +245,7 @@ def adventure_s1():
                         if event.unicode in valid_first_letters:
                             player_word += event.unicode  # Allow only valid first letters
                         else:
-                            incorrect_sound.play()
+                            config.INCORRECT.play()
                     else:
                         # Find words that match current player_word as a prefix
                         possible_words = [word for word in all_falling_words if word.startswith(player_word)]
@@ -278,7 +259,7 @@ def adventure_s1():
                             if event.unicode in valid_next_letters:  # Allow only valid next letters
                                 player_word += event.unicode
                             else:
-                                incorrect_sound.play()
+                                config.INCORRECT.play()
                         else:
                             pass  # Ignore incorrect input
 
@@ -286,7 +267,7 @@ def adventure_s1():
         for word in falling_words[:]:
             if word.rect.y > config.DEADZONE_LINE:
                 player_health -= 1
-                loss_hp_sound.play()
+                config.LOSS_HP.play()
                 falling_words.remove(word)
 
                 # Clear player's input if it matches the removed word
@@ -335,11 +316,11 @@ def adventure_s1():
             # Process words
             for word in falling_words[:]:
                 if player_word == word.word and word.rect.y > 54:
-                    laser_sound.play()
-                    player_score += len(word.word) * 1000
+                    config.LASER.play()
+                    player_score += len(word.word) * 100
                     spaceship.shoot_missile(word, missile_image)
                     remembered_words.append(word.word)
-                    boom_sound.play()
+                    config.BOOM.play()
                     explosions.append(Explosion(word.rect.centerx, word.rect.centery))
 
                     # Store correct word position for laser effect
@@ -358,7 +339,7 @@ def adventure_s1():
                 state_timer = 0
 
             if player_health <= 0:
-                game_over_sound.play()
+                config.GAMEOVER.play()
                 running = False
             pygame.draw.rect(screen, config.WHITE, (0, 0, config.WIDTH, 54)) 
             pygame.draw.rect(screen, config.DARKGREY, (0, 0, config.WIDTH, 50)) 
@@ -395,11 +376,11 @@ def adventure_s1():
 
             for word in falling_words[:]:
                 if player_word == word.word and word.rect.y > 54:
-                    laser_sound.play()
-                    player_score += len(word.word) * 1000
+                    config.LASER.play()
+                    player_score += len(word.word) * 100
                     spaceship.shoot_missile(word, missile_image)
                     remembered_words.append(word.word)
-                    boom_sound.play()
+                    config.BOOM.play()
                     explosions.append(Explosion(word.rect.centerx, word.rect.centery))
 
                     # Store correct word position for laser effect
@@ -412,7 +393,7 @@ def adventure_s1():
                 word.draw(player_word)
 
             if player_health <= 0:
-                game_over_sound.play()
+                config.GAMEOVER.play()
                 running = False
             pygame.draw.rect(screen, config.WHITE, (0, 0, config.WIDTH, 54)) 
             pygame.draw.rect(screen, config.DARKGREY, (0, 0, config.WIDTH, 50)) 
@@ -479,7 +460,7 @@ def adventure_s1():
                 if elapsed_time > 5000:
                     # spaceship.update()
                     # spaceship.draw()
-                    loss_hp_sound.play()
+                    config.LOSS_HP.play()
                     player_health -= 1
                     explosions.append(Explosion(spaceship.rect.centerx, config.HEIGHT-50))
                     player_word = ""
@@ -490,7 +471,7 @@ def adventure_s1():
                 boss.take_damage(1)  
                 player_score += 2000  
                 player_word = ""  
-                laser_sound.play()
+                config.LASER.play()
                 
                 # Define three possible explosion positions
                 explosion_positions = [
@@ -511,7 +492,7 @@ def adventure_s1():
 
             # Check if boss is defeated
             if boss.is_defeated():
-                boom_sound.play()
+                config.BOOM.play()
                 state = 4  
                 state_timer = 0
 
@@ -596,7 +577,7 @@ def adventure_s1():
 
             # Check player input
             if player_word in [w[0] for w in word_positions]:  # If player typed a correct word
-                correct_sound.play()
+                config.CORRECT.play()
                 player_score += len(player_word) * 2000
                 word_positions = [(w, x, y) for w, x, y in word_positions if w != player_word]  # Remove typed word
                 player_word = ""

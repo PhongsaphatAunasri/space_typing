@@ -10,11 +10,7 @@ import Particle
 # Initialize Pygame
 pygame.init()
 screen = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
-press_sound = pygame.mixer.Sound("sounds/press.wav")
-select_sound = pygame.mixer.Sound("sounds/select.wav")
 
-select_sound.set_volume(0.2) 
-press_sound.set_volume(0.2) 
 background_image = pygame.image.load("assets/bg.png") 
 font = config.FONT_MAIN
 def draw_text(text, font, color, x, y, blink=False):
@@ -69,7 +65,7 @@ def pause_game():
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    select_sound.play()
+                    config.SELECT.play()
                     if current_selection == 0:
                         pygame.mixer.unpause()
                         # Calculate the total paused time
@@ -80,8 +76,8 @@ def pause_game():
                 elif event.key == pygame.K_ESCAPE:
                     return "Main Menu"  # Return to main menu
                 elif event.key == pygame.K_UP:
-                    press_sound.play()
+                    config.PRESS.play()
                     current_selection = (current_selection - 1) % len(pause_options)
                 elif event.key == pygame.K_DOWN:
-                    press_sound.play()
+                    config.PRESS.play()
                     current_selection = (current_selection + 1) % len(pause_options)

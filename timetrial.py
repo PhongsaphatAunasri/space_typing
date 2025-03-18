@@ -18,24 +18,7 @@ heart_image = pygame.image.load("assets/heart.png")
 missile_image = pygame.image.load("assets/missile.png")
 
 #sound
-loss_hp_sound = pygame.mixer.Sound("sounds/losshp.wav")
-game_over_sound = pygame.mixer.Sound("sounds/gameover.wav")
-correct_sound = pygame.mixer.Sound("sounds/correct.wav")
-select_sound = pygame.mixer.Sound("sounds/select.wav")
-incorrect_sound = pygame.mixer.Sound("sounds/incorrect.wav")
-laser_sound = pygame.mixer.Sound("sounds/laser.wav")
-press_sound = pygame.mixer.Sound("sounds/press.wav")
-boom_sound = pygame.mixer.Sound("sounds/boom.wav")
-#set volume
-loss_hp_sound.set_volume(0.05)
-game_over_sound.set_volume(0.05)
-correct_sound.set_volume(0.05)
-select_sound.set_volume(0.05)  # Adjust volume 
-incorrect_sound.set_volume(0.05)
-press_sound.set_volume(0.2) 
-incorrect_sound.set_volume(0.1)
-boom_sound.set_volume(0.05)
-laser_sound.set_volume(0.2)
+
 def draw_text(text, font, color, x, y, blink=False):
     text_surface = font.render(text, True, color)
     text_rect = text_surface.get_rect(center=(x, y))
@@ -64,7 +47,7 @@ def draw_text_right_aligned(text, font, color, x, y):
 
 def game_over_menu_1(score,elapsed_time):
     config.TIME_SONG.stop()
-    game_over_sound.play()
+    config.GAMEOVER.play()
     options = ["Restart", "Main Menu"]
     current_selection = 0
     button_height = 60  # config.Height of each button
@@ -107,7 +90,7 @@ def game_over_menu_1(score,elapsed_time):
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    select_sound.play()
+                    config.SELECT.play()
                     if current_selection == 0:  # Restart option
                         pygame.mixer.stop()
                         config.TIME_SONG.play(-1)
@@ -115,14 +98,14 @@ def game_over_menu_1(score,elapsed_time):
                     elif current_selection == 1:  # Main Menu option
                         return "Main Menu"
                 elif event.key == pygame.K_UP:
-                    press_sound.play()
+                    config.PRESS.play()
                     current_selection = (current_selection - 1) % len(options)
                 elif event.key == pygame.K_DOWN:
-                    press_sound.play()
+                    config.PRESS.play()
                     current_selection = (current_selection + 1) % len(options) 
 def game_over_menu_2(formatted_time, score, target_words):
     config.TIME_SONG.stop()
-    game_over_sound.play()
+    config.GAMEOVER.play()
     options = ["Restart", "Main Menu"]
     current_selection = 0
     button_height = 60  # config.Height of each button
@@ -170,7 +153,7 @@ def game_over_menu_2(formatted_time, score, target_words):
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    select_sound.play()
+                    config.SELECT.play()
                     if current_selection == 0:  # Restart option
                         pygame.mixer.stop()
                         config.TIME_SONG.play(-1)
@@ -179,10 +162,10 @@ def game_over_menu_2(formatted_time, score, target_words):
                         config.TIME_SONG.stop()
                         return "Main Menu"
                 elif event.key == pygame.K_UP:
-                    press_sound.play()
+                    config.PRESS.play()
                     current_selection = (current_selection - 1) % len(options)
                 elif event.key == pygame.K_DOWN:
-                    press_sound.play()
+                    config.PRESS.play()
                     current_selection = (current_selection + 1) % len(options)                  
 def time_attack(score):
     player = Spaceship()
@@ -252,7 +235,7 @@ def time_attack(score):
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
-                press_sound.play()
+                config.PRESS.play()
                 if event.key == pygame.K_ESCAPE:
                     paused_duration = pause_game()
                     
@@ -271,7 +254,7 @@ def time_attack(score):
                         if event.unicode in valid_first_letters:
                             player_word += event.unicode  # Allow only valid first letters
                         else:
-                            incorrect_sound.play()
+                            config.INCORRECT.play()
                     else:
                         # Find words that match current player_word as a prefix
                         possible_words = [word for word in all_falling_words if word.startswith(player_word)]
@@ -285,7 +268,7 @@ def time_attack(score):
                             if event.unicode in valid_next_letters:  # Allow only valid next letters
                                 player_word += event.unicode
                             else:
-                                incorrect_sound.play()
+                                config.INCORRECT.play()
                         else:
                             pass  # Ignore incorrect input
 
@@ -297,13 +280,13 @@ def time_attack(score):
                             break
 
                     if correct_word:
-                        laser_sound.play()
+                        config.LASER.play()
                         # missile_image = pygame.image.load("assets/missile.png")
                         # player.shoot_missile(correct_word, missile_image)
                         
                         score += 1
                         lasers.append((player.rect.centerx, player.rect.top, correct_word.rect.centerx, correct_word.rect.centery))
-                        boom_sound.play()
+                        config.BOOM.play()
                         explosions.append(Explosion(correct_word.rect.centerx, correct_word.rect.centery))
                         falling_words.remove(correct_word)
                         player_word = ""
@@ -365,7 +348,7 @@ def time_attack(score):
 
         # End the game when time runs out
         if start_ticks is not None and seconds > game_time:
-            game_over_sound.play()
+            config.GAMEOVER.play()
             running = False
 
         # Refresh the screen
@@ -422,7 +405,7 @@ def blitz(score):
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
-                press_sound.play()
+                config.PRESS.play()
                 if event.key == pygame.K_ESCAPE:
                     paused_duration = pause_game()
                     
@@ -441,7 +424,7 @@ def blitz(score):
                         if event.unicode in valid_first_letters:
                             player_word += event.unicode
                         else:
-                            incorrect_sound.play()
+                            config.INCORRECT.play()
                     else:
                         possible_words = [word for word in all_falling_words if word.startswith(player_word)]
                         
@@ -452,7 +435,7 @@ def blitz(score):
                             if event.unicode in valid_next_letters:
                                 player_word += event.unicode
                             else:
-                                incorrect_sound.play()
+                                config.INCORRECT.play()
 
                     correct_word = None
                     for word in falling_words:
@@ -461,10 +444,10 @@ def blitz(score):
                             break
 
                     if correct_word:
-                        laser_sound.play()
+                        config.LASER.play()
                         score += 1
                         lasers.append((player.rect.centerx, player.rect.top, correct_word.rect.centerx, correct_word.rect.centery))
-                        boom_sound.play()
+                        config.BOOM.play()
                         explosions.append(Explosion(correct_word.rect.centerx, correct_word.rect.centery))
                         falling_words.remove(correct_word)
                         player_word = ""
@@ -507,7 +490,7 @@ def blitz(score):
         player.draw()
 
         if score >= target_words:
-            game_over_sound.play()
+            config.GAMEOVER.play()
             running = False
 
         pygame.display.flip()

@@ -21,24 +21,7 @@ font = config.FONT_MAIN
 heart_image = pygame.image.load("assets/heart.png")
 missile_image = pygame.image.load("assets/missile.png")
 
-#sound
-loss_hp_sound = pygame.mixer.Sound("sounds/losshp.wav")
-game_over_sound = pygame.mixer.Sound("sounds/gameover.wav")
-correct_sound = pygame.mixer.Sound("sounds/correct.wav")
-select_sound = pygame.mixer.Sound("sounds/select.wav")
-boom_sound = pygame.mixer.Sound("sounds/boom.wav")
-laser_sound = pygame.mixer.Sound("sounds/laser.wav")
-press_sound = pygame.mixer.Sound("sounds/press.wav")
-incorrect_sound = pygame.mixer.Sound("sounds/incorrect.wav")
-#set volume
-loss_hp_sound.set_volume(0.2)
-game_over_sound.set_volume(0.2)
-correct_sound.set_volume(0.05)
-select_sound.set_volume(0.2)  
-boom_sound.set_volume(0.05)
-laser_sound.set_volume(0.2)
-press_sound.set_volume(0.2) 
-incorrect_sound.set_volume(0.1)
+
 
 player_health = 3
 
@@ -78,7 +61,7 @@ def game_over_menu_s(player_score):
     config.SURVIVOR_SONG.stop()
     clock = pygame.time.Clock()
     running = True
-    game_over_sound.play()
+    config.GAMEOVER.play()
     options = ["Restart", "Main Menu"]
     current_selection = 0
     button_height = 60  # config.Height of each button
@@ -119,7 +102,7 @@ def game_over_menu_s(player_score):
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    select_sound.play()
+                    config.SELECT.play()
                     if current_selection == 0:  # Restart option
                         pygame.mixer.stop()
                         config.SURVIVOR_SONG.play(-1)
@@ -128,10 +111,10 @@ def game_over_menu_s(player_score):
                         
                         return "Main Menu"
                 elif event.key == pygame.K_UP:
-                    press_sound.play()
+                    config.PRESS.play()
                     current_selection = (current_selection - 1) % len(options)
                 elif event.key == pygame.K_DOWN:
-                    press_sound.play()
+                    config.PRESS.play()
                     current_selection = (current_selection + 1) % len(options)
 
 
@@ -190,7 +173,7 @@ def survivor_mode(player_health):
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
-                press_sound.play()
+                config.PRESS.play()
                 if event.key == pygame.K_ESCAPE:
                     result = pause_game()
                     if result == "Main Menu":
@@ -206,7 +189,7 @@ def survivor_mode(player_health):
                         if event.unicode in valid_first_letters:
                             player_word += event.unicode  # Allow only valid first letters
                         else:
-                            incorrect_sound.play()
+                            config.INCORRECT.play()
                     else:
                         # Find words that match current player_word as a prefix
                         possible_words = [word for word in all_falling_words if word.startswith(player_word)]
@@ -220,7 +203,7 @@ def survivor_mode(player_health):
                             if event.unicode in valid_next_letters:  # Allow only valid next letters
                                 player_word += event.unicode
                             else:
-                                incorrect_sound.play()
+                                config.INCORRECT.play()
                         else:
                             pass  # Ignore incorrect input
                     
@@ -232,13 +215,13 @@ def survivor_mode(player_health):
                             break
 
                     if correct_word:
-                        laser_sound.play()
+                        config.LASER.play()
                         word_length = len(correct_word.word)
                         player_score += word_length * 100 * score_multiplier
                         score_multiplier = min(score_multiplier + 1, max_multiplier)
                         score_flash_timer = 30  # Flash duration
                         lasers.append((spaceship.rect.centerx, spaceship.rect.top, correct_word.rect.centerx, correct_word.rect.centery))
-                        boom_sound.play()
+                        config.BOOM.play()
                         explosions.append(Explosion(correct_word.rect.centerx, correct_word.rect.centery))
                         
                         # Remove word from correct group
@@ -282,7 +265,7 @@ def survivor_mode(player_health):
         for word in falling_words + fast_falling_words:
             if word.rect.y > config.DEADZONE_LINE:
                 player_health -= 1
-                loss_hp_sound.play()
+                config.LOSS_HP.play()
                 score_multiplier = 2  
                 if player_word and word.word.startswith(player_word):
                     player_word = ""
@@ -339,7 +322,7 @@ def survivor_mode(player_health):
             multiplier_display_timer = 120  
 
         if player_health <= 0:
-            game_over_sound.play()
+            config.GAMEOVER.play()
         pygame.display.flip()
         clock.tick(config.FPS)
 
